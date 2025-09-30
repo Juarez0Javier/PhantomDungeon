@@ -1,0 +1,6 @@
+#ifndef OTRASFUNCIONES_H_INCLUDED
+#define OTRASFUNCIONES_H_INCLUDED
+
+void clearConsole();
+
+#endif // OTRASFUNCIONES_H_INCLUDED

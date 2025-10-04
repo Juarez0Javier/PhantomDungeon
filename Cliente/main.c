@@ -1,93 +1,95 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL.h>
+#include "main.h"
 
-#include "./constantes.h"
-#include "../Comun/comun.h"
-#include "./secciones/secciones.h"
-#include "./partida/partida.h"
-#include "./config/config.h"
+int main (int argc, char *argv[]) {
 
-int main (int argc, char* argv[]) {
+    ConfigData configs;
+    GHP_TexturesData tex_data;
+
+    char* nameWindow = "Fantasmas";
+
+    struct GHP_WindowData myWindow;
+
+    if (GHP_SetWindow(&myWindow, nameWindow, react, WIDTH, HEIGHT, &configs, &tex_data)) { // it returns true at the end of the partida
+        GHP_DestroyTexturesData(&tex_data);
+        GHP_freeBG(&tex_data);
+        GHP_DestroyWindow(&myWindow);
+    }
+
+    return 0;
+}
+
+void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData) {
+
+    ConfigData* configs = (ConfigData*) partidaData;
+
+    int seccion = SECCION_MENU, seccionPrev; // init seccion
 
     Partida partida;
-    int seccionAct = SECCION_MENU;
-    int seccionAnt;
-    // unsigned ultimoFrame;
-    bool corriendo = true;
+    iniciarPartida(&partida, configs, TexData, renderer);
+    //nullpartida(&partida);
 
-    Seccion secciones[] = {
-        {initMenu, handleMenu, renderMenu},
+    if (!iniciarPartida(&partida, configs, TexData, renderer)) {
+        printf("\nError in partida initalizing");
+        seccion=SECCION_SALIR_DIRECTO;
+    }
+
+    Seccion secciones[] = { // BE CAREFUL!!! IT HAS SAME ORDER AS CONSTANTS MODE_*
+        {initMenu, handlerMenu, NULL},
         {initJuegoCorriendo, handleJuegoCorriendo, renderJuegoCorriendo},
-        {initDerrota, handleDerrota, renderDerrota},
-        {initVictoria, handleVictoria, renderVictoria},
+        {initDerrota, handlerDerrota, NULL},
+        {initVictoria, handlerVictoria, NULL},
+        {initVerConfigs, handlerVerConfigs, NULL}
     };
 
-    // Carga de la ventana y configs de SDL.
-    if (SDL_Init(SDL_INIT_VIDEO) != false) {
-        printf("Error SDL: %s\n", SDL_GetError());
-        return ERR_VIDEO;
+    if (seccion != SECCION_SALIR_DIRECTO) {
+        secciones[seccion].init(renderer, &partida, TexData, configs, &seccion);
+        SDL_RenderPresent(renderer);
     }
 
-    SDL_Window* ventana = SDL_CreateWindow(
-        "Ejemplo SDL Estado",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        640, 480,
-        SDL_WINDOW_SHOWN
-    );
+    SDL_Event event;
+    while (seccion != SECCION_SALIR_DIRECTO) {
 
-    if (!ventana) {
-        printf("Error ventana: %s\n", SDL_GetError());
-        SDL_Quit();
-        return ERR_VIDEO;
-    }
-
-    // Mientras que el mapa se mantenga fijo, podemos tener esto acá.
-    if (!crearConfigPartida(&partida)) {
-        printf("Error creando la configuracion de partida");
-        return ERR_CONFIG;
-    }
-
-    secciones[seccionAct].init(&partida);
-    seccionAnt = seccionAct;
-    // ultimoFrame = SDL_GetTicks();
-
-    while (corriendo) {
-        SDL_Event e;
-        // float deltaTime;
         unsigned inicioFrame = SDL_GetTicks();
-        unsigned duracionFrame;
 
-        // Calculo de deltaTime (en ms)
-        // deltaTime = inicioFrame - ultimoFrame;
+        while (SDL_PollEvent(&event) && seccion != SECCION_SALIR_DIRECTO) {
 
-        while (SDL_PollEvent(&e)) {
-
-            if (e.type == SDL_QUIT)
-                corriendo = false;
-
-            secciones[seccionAct].handle(&e, &partida, &seccionAct);
-
-            // Maneja los cambios entre secciones
-            if (seccionAct != seccionAnt) {
-                seccionAnt = seccionAct;
-                secciones[seccionAct].init(&partida);
+            if (event.type == SDL_QUIT) {
+                seccion = SECCION_SALIR_DIRECTO;
             }
+
+            else {
+
+                seccionPrev = seccion;
+                secciones[seccion].handler(renderer, &partida, TexData, &event, &seccion);
+
+                if (seccionPrev != seccion && seccion != SECCION_SALIR_DIRECTO) { // init function only when the seccion changes
+
+                    SDL_Event discard;
+                    while (SDL_PollEvent(&discard)) {} // clear the queue of events
+
+                    secciones[seccion].init(renderer, &partida, TexData, configs, &seccion);
+                }
+
+                // updatepartidaTime(renderer, &partida, TexData, seccion); if needed should be here to update everytime
+
+            }
+
         }
 
-        secciones[seccionAct].render(&partida);
-        duracionFrame = SDL_GetTicks() - inicioFrame;
+        if (secciones[seccion].render && seccion != SECCION_SALIR_DIRECTO) { // because some seccions could have no render
+            secciones[seccion].render(renderer, &partida, TexData, &seccion);
+            SDL_RenderPresent(renderer);
+        }
+
+        unsigned duracionFrame = SDL_GetTicks() - inicioFrame;
 
         if (duracionFrame < DELAY_DE_FRAMES)
             SDL_Delay(DELAY_DE_FRAMES - duracionFrame);
 
+        // updatepartidaTime(renderer, &partida, TexData, seccion); // It has to be twice to update each frame (with or without event)
+
     }
 
-    destruirConfigPartida(&partida);
+    destruirPartida(&partida);
 
-    SDL_DestroyWindow(ventana);
-    SDL_Quit();
-
-    return 0;
 }

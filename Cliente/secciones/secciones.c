@@ -1,13 +1,9 @@
-#include <stdio.h>
-#include <SDL.h>
-#include "./secciones.h"
-#include "../mapa/mapa.h"
-#include "../partida/partida.h"
-#include "../constantes.h"
-#include "../auxiliares/matriz/matriz.h"
-#include "../../Comun/comun.h"
+#include "secciones.h"
 
-void initMenu (Partida* partida) {
+void initMenu(SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, ConfigData* configData, int* seccion) {
+    partida->jugador.num = 1;
+    partida->jugador.tipo = JUGADOR;
+
     system("cls");
 
     printf("=======================\n");
@@ -16,29 +12,30 @@ void initMenu (Partida* partida) {
 
     printf("Enter: Jugar\n");
     printf("Escape: Salir\n");
+    printf("'C': Ver configuracion\n");
+
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
 }
 
-void handleMenu(SDL_Event* e, Partida* partida, int* seccion) {
-    SDL_Event keyEvent;
-
-    if (e -> type == SDL_KEYDOWN) {
-        switch (e -> key.keysym.sym) {
+void handlerMenu(SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, SDL_Event* event, int* seccion) {
+    if (event->type == SDL_KEYDOWN) {
+        switch (event -> key.keysym.sym) {
             case SDLK_RETURN:
                 *seccion = SECCION_PARTIDA;
                 break;
             case SDLK_ESCAPE:
-                keyEvent.type = SDL_QUIT;
-                SDL_PushEvent(&keyEvent);
+                *seccion = SECCION_SALIR_DIRECTO;
+                break;
+            case 'c':
+                *seccion = SECCION_CONFIGS;
                 break;
         }
     }
 }
 
-void renderMenu (Partida* partida) {
 
-}
 
-void initJuegoCorriendo (Partida* partida) {
+void initJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, ConfigData* configData, int* seccion) {
 
     printf("Init juego\n");
 
@@ -48,17 +45,18 @@ void initJuegoCorriendo (Partida* partida) {
     partida -> puntuacion = 0;
 
     // Le podriamos pasar el nombre del archivo de laberinto por argumentos a main.
-    // Una vez tengamos el algoritmo generador, reemplazarlo acÃ¡.
-    if (!cargarMapaDeArchivo(&partida -> mapa, &partida -> jugador, &partida -> fantasmas, "mapa/laberinto.txt"))
+    // Una vez tengamos el algoritmo generador, reemplazarlo acá.
+    if (!cargarMapaDeArchivo(&partida -> mapa, &partida -> jugador, &partida -> fantasmas, RUTA_LABERINTO_PRESET))
         printf("Error cargando el mapa del archivo.\n");
-    
+
     mostrarMapa(&partida -> mapa);
+    GHP_renderMesh(renderer, &(tex->active_mesh), 0);
 }
 
-void handleJuegoCorriendo (SDL_Event* e, Partida* partida, int* seccion) {
+void handleJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, SDL_Event* event, int* seccion) {
 
-    if (e -> type == SDL_KEYDOWN) {
-        char entrada = teclaAWASD(e -> key.keysym.sym);
+    if (event -> type == SDL_KEYDOWN) {
+        char entrada = GHP_keyCodeToWASD(event -> key.keysym.sym);
 
         // Mientras este pausado, solo acepta los inputs para salir de pausa o volver al menu.
         if (partida -> pausado) {
@@ -101,14 +99,14 @@ void handleJuegoCorriendo (SDL_Event* e, Partida* partida, int* seccion) {
 
             // Luego, calcula el movimiento de todos los fantasmas.
             calcularMovFantasmas(
-                &partida -> fantasmas, 
-                &partida -> mapa, 
+                &partida -> fantasmas,
+                &partida -> mapa,
                 &partida -> movs
             );
         }
     }
 
-    // Probablemente haya una mejor forma de manejar esto, quizÃ¡s no hace falta el condicional.
+    // Probablemente haya una mejor forma de manejar esto, quizás no hace falta el condicional.
     if (!partida -> pausado) {
         resolverMovimientos(
             partida,
@@ -119,14 +117,12 @@ void handleJuegoCorriendo (SDL_Event* e, Partida* partida, int* seccion) {
     }
 
     if (*seccion != SECCION_PARTIDA) {
-        renderJuegoCorriendo(partida);
         vaciarCola(&partida -> movs);
         vectorVaciar(&partida -> fantasmas);
-        return;
     }
 }
 
-void renderJuegoCorriendo (Partida* partida) {
+void renderJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, int* seccion) {
 
     if (!partida -> pausado) {
         system("cls");
@@ -140,10 +136,14 @@ void renderJuegoCorriendo (Partida* partida) {
         printf("\n");
 
         mostrarMapa(&partida -> mapa);
+
+        actualizarMapaRender(renderer, &partida->mapa, tex, tex->active_mesh);
     }
 }
 
-void initDerrota (Partida* partida) {
+
+
+void initDerrota(SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, ConfigData* configData, int* seccion) {
     printf("\n");
     printf("=======================\n");
     printf("Perdiste!\n");
@@ -151,12 +151,12 @@ void initDerrota (Partida* partida) {
     printf("Escape: Salir al menu.\n");
     printf("=======================\n");
 
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     // Mostrar registro de movmientos.
 }
 
-void handleDerrota (SDL_Event* e, Partida* partida, int* seccion) {
-
-    switch (e -> key.keysym.sym) {
+void handlerDerrota(SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, SDL_Event* event, int* seccion) {
+    switch (event -> key.keysym.sym) {
         case SDLK_ESCAPE:
             *seccion = SECCION_MENU;
             break;
@@ -166,11 +166,10 @@ void handleDerrota (SDL_Event* e, Partida* partida, int* seccion) {
     }
 }
 
-void renderDerrota (Partida* partida) {
-    
-}
 
-void initVictoria (Partida* partida) {
+
+
+void initVictoria(SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, ConfigData* configData, int* seccion) {
     printf("\n");
     printf("=======================\n");
     printf("Ganaste!\n");
@@ -178,12 +177,12 @@ void initVictoria (Partida* partida) {
     printf("Escape: Salir al menu.\n");
     printf("=======================\n");
 
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     // Mostrar registro de movmientos.
 }
 
-void handleVictoria (SDL_Event* e, Partida* partida, int* seccion) {
-    
-    switch (e -> key.keysym.sym) {
+void handlerVictoria(SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, SDL_Event* event, int* seccion) {
+    switch (event -> key.keysym.sym) {
         case SDLK_ESCAPE:
             *seccion = SECCION_MENU;
             break;
@@ -193,5 +192,39 @@ void handleVictoria (SDL_Event* e, Partida* partida, int* seccion) {
     }
 }
 
-void renderVictoria (Partida* partida) {
+
+
+
+
+void initVerConfigs(SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, ConfigData* configData, int* seccion) {
+    printf("\nConfiguraciones:\n");
+    mostrarConfigs(configData);
+    printf("\nPresione enter para volver al menu...");
+
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
 }
+
+void handlerVerConfigs(SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, SDL_Event* event, int* seccion) {
+    if (event->type == SDL_KEYDOWN) {
+        switch (event -> key.keysym.sym) {
+            case SDLK_RETURN:
+                *seccion = SECCION_MENU;
+                break;
+            case SDLK_ESCAPE:
+                *seccion = SECCION_SALIR_DIRECTO;
+                break;
+        }
+    }
+}
+
+
+
+void handleButtonsClick(GHP_Button* buttons, int ammount, int x, int y, Partida* partida, int* seccion, SDL_Event* event) {
+    for (int i=0; i<ammount; i++) {
+        if (event->type == SDL_MOUSEBUTTONDOWN && event->button.button == SDL_BUTTON_LEFT && GHP_clickInButton(x, y, buttons+i)) {
+            if ((buttons+i)->on_click)
+                (buttons+i)->on_click(partida, seccion);
+        }
+    }
+}
+

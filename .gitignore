@@ -1,0 +1,7 @@
+# Binarios generados por el programa
+**/bin/
+**/obj/
+
+# Archivos de CodeBlocks
+*.depend
+*.layout

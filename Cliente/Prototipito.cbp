@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Prototipito" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Prototipito" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="../libs/SDL2_linkNeededs" />
+					<Add directory="../libs" />
+					<Add directory="../libs/SDL2_more" />
+					<Add directory="../libs/graphics" />
+					<Add directory="../libs/Comun" />
+					<Add directory="../libs/Cola" />
+					<Add directory="../libs/Vector" />
+				</Compiler>
+				<Linker>
+					<Add option="-lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf" />
+					<Add library="SDL2" />
+					<Add library="SDL2main" />
+					<Add library="SDL2_ttf" />
+					<Add library="SDL2_image" />
+					<Add directory="../libs/SDL2_linkNeededs" />
+					<Add directory="../libs" />
+					<Add directory="../libs/SDL2_more" />
+					<Add directory="../libs/graphics" />
+					<Add directory="../libs/Comun" />
+					<Add directory="../libs/Cola" />
+					<Add directory="../libs/Vector" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Prototipito" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="../libs/Cola/Cola.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/Cola/Cola.h" />
+		<Unit filename="../libs/Comun/comun.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_assert.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_atomic.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_audio.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_bits.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_blendmode.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_clipboard.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_config.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_cpuinfo.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_egl.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_endian.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_error.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_events.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_filesystem.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_gamecontroller.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_gesture.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_haptic.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_hidapi.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_hints.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_joystick.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_keyboard.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_keycode.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_loadso.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_locale.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_log.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_main.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_messagebox.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_metal.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_misc.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_mouse.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_mutex.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_name.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_opengl.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_opengl_glext.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_opengles.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_opengles2.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_opengles2_gl2.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_opengles2_gl2ext.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_opengles2_gl2platform.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_opengles2_khrplatform.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_pixels.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_platform.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_power.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_quit.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_rect.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_render.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_revision.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_rwops.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_scancode.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_sensor.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_shape.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_stdinc.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_surface.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_system.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_syswm.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_assert.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_common.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_compare.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_crc32.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_font.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_fuzzer.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_harness.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_images.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_log.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_md5.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_memory.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_test_random.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_thread.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_timer.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_touch.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_types.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_version.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_video.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/SDL_vulkan.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/begin_code.h" />
+		<Unit filename="../libs/SDL2_linkNeededs/close_code.h" />
+		<Unit filename="../libs/SDL2_more/SDL_image.h" />
+		<Unit filename="../libs/SDL2_more/SDL_ttf.h" />
+		<Unit filename="../libs/Vector/Vector.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/Vector/Vector.h" />
+		<Unit filename="../libs/graphics/graphics.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/graphics/graphics.h" />
+		<Unit filename="../libs/matrizDinamica/dinMtx.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/matrizDinamica/dinMtx.h" />
+		<Unit filename="configs/configs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="configs/configs.h" />
+		<Unit filename="constants.h" />
+		<Unit filename="entidades/entidades.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="entidades/entidades.h" />
+		<Unit filename="inicios/inicios.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="inicios/inicios.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main.h" />
+		<Unit filename="mapa/mapa.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mapa/mapa.h" />
+		<Unit filename="movimiento/movimiento.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="movimiento/movimiento.h" />
+		<Unit filename="otros/otrasFunciones.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="otros/otrasFunciones.h" />
+		<Unit filename="partida/partida.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="partida/partida.h" />
+		<Unit filename="secciones/secciones.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="secciones/secciones.h" />
+		<Extensions>
+			<DoxyBlocks>
+				<comment_style block="0" line="0" />
+				<doxyfile_project project_number="0.0.1" />
+				<doxyfile_build extract_all="1" extract_private="1" extract_static="1" />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

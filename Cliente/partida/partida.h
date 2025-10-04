@@ -1,30 +1,22 @@
-#include <SDL.h>
-#include "../mapa/mapa.h"
-#include "./entidad.h"
-#include "../../Vector/Vector.h"
-#include "../../Cola/Cola.h"
+#ifndef GAMESTATE_H_INCLUDED
+#define GAMESTATE_H_INCLUDED
 
-#ifndef PARTIDA_H
-#define PARTIDA_H
+#include "../constants.h"
+#include "../mapa/mapa.h"
 
 typedef struct {
     bool pausado;
     unsigned vidasRestantes, premiosObt, puntuacion;
     Mapa mapa;
+    //MapaEntidades mapaEntidades;
     Entidad jugador;
     Vector fantasmas;
     tCola movs;
-    //tLista regMovs;
 } Partida;
 
-typedef struct {
-    unsigned x, y;
-    Entidad* ent;
-} Movimiento;
+typedef Partida GameState; // just in case
 
-void calcularMovJugador (Entidad* jugador, Mapa* mapa, char direccion, tCola* movs);
-void calcularMovFantasmas (Vector* fantasmas, Mapa* mapa, tCola* movs);
-void resolverMovimientos (Partida* partida, Mapa* mapa, tCola* movs, int* seccion);
-char teclaAWASD (SDL_KeyCode tecla);
+bool crearPartida (Partida* partida);
+void destruirPartida (Partida* partida);
 
-#endif
+#endif // GAMESTATE_H_INCLUDED

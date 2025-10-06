@@ -2,19 +2,8 @@
 #define COLA_H_INCLUDED
 
 #include <stddef.h>
-
-#define MIN(a,b) ((a)<(b)?(a):(b))
-
-#define true 1
-#define false 0
-
-typedef int bool;
-
-typedef struct sNodo {
-    void* info;
-    unsigned tamInfo;
-    struct sNodo* sig;
-} tNodo;
+#include "../Comun/comun.h"
+#include "../Comun/nodo.h"
 
 typedef struct {
     tNodo* pri;
@@ -28,6 +17,5 @@ bool verPrimero(const tCola* c, void* info, unsigned cantB);
 void vaciarCola(tCola* c);
 bool colaVacia(const tCola* c);
 bool colaLlena(const tCola* c);
-
 
 #endif // COLA_H_INCLUDED

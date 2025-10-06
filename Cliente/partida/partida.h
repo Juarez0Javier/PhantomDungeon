@@ -8,10 +8,10 @@ typedef struct {
     bool pausado;
     unsigned vidasRestantes, premiosObt, puntuacion;
     Mapa mapa;
-    //MapaEntidades mapaEntidades;
     Entidad jugador;
     Vector fantasmas;
     tCola movs;
+    tLista regMovs;
 } Partida;
 
 typedef Partida GameState; // just in case

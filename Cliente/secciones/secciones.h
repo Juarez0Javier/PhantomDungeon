@@ -21,7 +21,7 @@
 
 typedef struct {
     void (*init)(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-    void (*handler)(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* mode);
+    void (*handler)(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* mode, unsigned deltaTime);
     void (*render)(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, int* mode);
 } Seccion;
 
@@ -30,23 +30,20 @@ typedef struct {
 // and the init, handler and render for each menu
 
 void initMenu(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handlerMenu(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* seccion);
+void handlerMenu(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* seccion, unsigned deltaTime);
 
 void initJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handleJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, SDL_Event* event, int* seccion);
+void handleJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, SDL_Event* event, int* seccion, unsigned deltaTime);
 void renderJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, int* mode);
 
 void initDerrota(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handlerDerrota(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* mode);
+void handlerDerrota(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* mode, unsigned deltaTime);
 
 void initVictoria(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handlerVictoria(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* mode);
+void handlerVictoria(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* mode, unsigned deltaTime);
 
 void initVerConfigs(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handlerVerConfigs(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* seccion);
-
-
-
+void handlerVerConfigs(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* seccion, unsigned deltaTime);
 
 // otros
 void handleButtonsClick(GHP_Button* buttons, int ammount, int x, int y, Partida* game, int* mode, SDL_Event* event);

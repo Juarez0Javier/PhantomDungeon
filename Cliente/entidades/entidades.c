@@ -1,5 +1,16 @@
 #include "entidades.h"
 
+void crearEntidad(Entidad* e, unsigned x, unsigned y, char tipo, size_t ticksEntreMovs) {
+    e -> x = x;
+    e -> y = y;
+    e -> xInicial = x;
+    e -> yInicial = y;
+    e -> tipo = tipo;
+    e -> eliminado = false;
+    e -> ticksEntreMovs = ticksEntreMovs;
+    e -> ticksUltimoMov = ticksEntreMovs;
+}
+
 int cmpEntidad(void* a, void* b) {
     Entidad* a2 = (Entidad*)a;
     Entidad* b2 = (Entidad*)b;

@@ -3,12 +3,16 @@
 bool iniciarConfig(ConfigData* configs) {
 
     Vector campos;
-    vectorCrear(&campos, sizeof(campoConfig));
-
-    char buffer[51];
+    char buffer[TAM_LINEA + 1];
     campoConfig campoBuffer;
     FILE* archConfigs = fopen(RUTA_CONFIGS, "rt");
-    while (fgets(buffer, 51, archConfigs)) {
+
+    if (archConfigs)
+        return false;
+
+    vectorCrear(&campos, sizeof(campoConfig));
+
+    while (fgets(buffer, TAM_LINEA + 1, archConfigs)) {
         sscanf(buffer, "%[^:]: %f", campoBuffer.argumento, &campoBuffer.valor);
         vectorInsertarAlFinal(&campos, &campoBuffer);
     }
@@ -22,29 +26,27 @@ bool iniciarConfig(ConfigData* configs) {
         {"maximo_vidas_extra",&configs->maximo_vidas_extra}
     };
 
-    for (int i=0; i<sizeof(camposValidos)/sizeof(campoValido); i++) {
+    for (int i = 0; i < sizeof(camposValidos) / sizeof(campoValido); i++) {
         int pos = vectorDesordBuscar(&campos, camposValidos[i].argumento, cmpCampoTxt);
         campoConfig* campConf = (campoConfig*)campos.vec + pos;
-        *(camposValidos[i].p) = campConf->valor; // srry
+        *(camposValidos[i].p) = campConf->valor;
     }
 
     mostrarConfigs(configs);
 
+    fclose(archConfigs);
     return true;
 }
 
 bool validarConfig(ConfigData* configs) {
-
-    if (
+    return !(
         configs->filas < MIN_FILAS || configs->filas > MAX_FILAS
         || configs->columnas < MIN_COLUMNAS || configs->columnas > MAX_COLUMNAS
         || configs->maximo_numero_fantasmas < MIN_NUM_FANTASMAS || configs->maximo_numero_fantasmas > MAX_NUM_FANTASMAS // kinda weird, ask. TODO
         || configs->maximo_numero_premios < MIN_NUM_PREMIOS || configs->maximo_numero_premios > MAX_NUM_PREMIOS
         || configs->maximo_vidas_extra < MIN_VIDAS_EXTRA || configs->maximo_vidas_extra > MAX_VIDAS_EXTRA
         || configs->vidas_inicio < MIN_VIDAS_INICIO || configs->vidas_inicio > MAX_VIDAS_INICIO
-    ) return false;
-
-    return true;
+    );
 }
 
 void aplicarConfig(ConfigData* configs, GameState* game) { // to put in game the configs

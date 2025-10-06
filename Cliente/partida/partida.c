@@ -3,6 +3,7 @@
 bool crearPartida (Partida* partida) {
 
     crearCola(&partida -> movs);
+    crearLista(&partida -> regMovs);
 
     if (!vectorCrear(&partida -> fantasmas, sizeof(Entidad))) {
         printf("Error de memoria creando el vector de fantasmas.\n");
@@ -20,6 +21,7 @@ bool crearPartida (Partida* partida) {
 
 void destruirPartida (Partida* partida) {
     vaciarCola(&partida -> movs);
+    vaciarLista(&partida -> regMovs);
     vectorDestruir(&partida -> fantasmas);
     destruirMatriz(partida -> mapa.filas, (void*) partida -> mapa.data);
     destruirMatriz(partida -> mapa.filas, (void*) partida -> mapa.entidades);

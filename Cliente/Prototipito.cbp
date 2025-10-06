@@ -57,6 +57,10 @@
 		</Unit>
 		<Unit filename="../libs/Cola/Cola.h" />
 		<Unit filename="../libs/Comun/comun.h" />
+		<Unit filename="../libs/Lista/Lista.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/Lista/Lista.h" />
 		<Unit filename="../libs/SDL2_linkNeededs/SDL.h" />
 		<Unit filename="../libs/SDL2_linkNeededs/SDL_assert.h" />
 		<Unit filename="../libs/SDL2_linkNeededs/SDL_atomic.h" />

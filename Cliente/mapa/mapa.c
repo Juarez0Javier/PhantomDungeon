@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "mapa.h"
 
 bool crearMapa(Mapa* mapa, int filas, int cols) {
@@ -108,7 +109,7 @@ bool cargarMapaDeArchivo (Mapa* mapa, Entidad* jugador, Vector* fantasmas, const
     FILE* archTxt = fopen(nomArch, "rt");
     Entidad fantasma, *pf;
     VectorIterador it;
-    int i = 0, j;
+    int i = 0, j, ticksEntreMovs;
     char casilla;
 
     if (!archTxt)
@@ -124,23 +125,16 @@ bool cargarMapaDeArchivo (Mapa* mapa, Entidad* jugador, Vector* fantasmas, const
 
             switch (casilla) {
                 case ENTRADA:
-                    jugador -> x = j;
-                    jugador -> y = i;
-                    jugador -> xInicial = j;
-                    jugador -> yInicial = i;
-                    jugador -> tipo = JUGADOR;
-                    jugador -> eliminado = false;
-
+                    crearEntidad(jugador, j, i, JUGADOR, COOLDOWN_MOV_JUGADOR);
                     mapa -> entidades[i][j] = jugador; // cuidado: no cuida que sea indexable
                     break;
 
                 case FANTASMA:
-                    fantasma.x = j;
-                    fantasma.y = i;
-                    fantasma.xInicial = j;
-                    fantasma.yInicial = i;
-                    fantasma.tipo = FANTASMA;
-                    fantasma.eliminado = false;
+
+                    // Crea diferentes cooldowns, entre 500 y 1000ms.
+                    // Esto podriamos dejarlo afuera del while, asignado un unico cooldown a cada fantasma si trabajamos por dificultades.
+                    ticksEntreMovs = (rand() % 500) + 500;
+                    crearEntidad(&fantasma, j, i, FANTASMA, ticksEntreMovs);
 
                     if (vectorInsertarAlFinal(fantasmas, &fantasma) != OK)
                         printf("Error al insertar fantasma, memoria insuficiente");
@@ -264,4 +258,3 @@ void actualizarMapaRender(SDL_Renderer* renderer, Mapa* mapa, GHP_TexturesData* 
         }
     }
 }
-

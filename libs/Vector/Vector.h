@@ -14,12 +14,6 @@
 #define AUMENTAR 1
 #define DISMINUIR 2
 
-#define BURBUJEO 1
-#define SELECCION 2
-#define SELECCION_DOBLE 3
-#define INSERCION 4
-#define QUICK_SORT 5
-
 typedef struct
 {
     void* vec;

@@ -12,6 +12,7 @@
 #include "../libs/Comun/comun.h"
 #include "../libs/Vector/Vector.h"
 #include "../libs/Cola/Cola.h"
+#include "../libs/Lista/Lista.h"
 #include "../libs/graphics/graphics.h"
 #include "../libs/matrizDinamica/dinMtx.h"
 
@@ -38,15 +39,15 @@
 #define CONFIG_COLS 10
 #define CONFIG_VIDAS 1
 // Configuracion de video
-#define FPS 3
+#define FPS 30
 #define DELAY_DE_FRAMES 1000/FPS
-#define COOLDOWN_MOV_JUGADOR 300 // aprox ms
+#define COOLDOWN_MOV_JUGADOR 100 // aprox ms
 
 
 // Rutas
 #define RUTA_LABERINTO_PRESET "./laberintos/laberinto.txt"
 #define RUTA_CONFIGS "./config.txt"
-#define RUTA_FONDO "src/img/background.png"
+#define RUTA_FONDO "./src/img/background.png"
 #define PATH_ASSET "./src/img/asset.png"
 
 // Secciones de juego

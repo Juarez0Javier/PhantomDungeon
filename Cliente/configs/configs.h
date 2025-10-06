@@ -4,6 +4,8 @@
 #include "../constants.h"
 #include "../partida/partida.h"
 
+#define TAM_LINEA 50
+
 typedef struct {
     float filas;
     float columnas;

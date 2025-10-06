@@ -9,12 +9,13 @@
 
 typedef struct {
     char tipo;
-    unsigned num;
+    unsigned num; // Esto no haria falta
     unsigned x, y, xInicial, yInicial;
     size_t ticksEntreMovs, ticksUltimoMov;
     bool eliminado;
 } Entidad;
 
+void crearEntidad(Entidad* e, unsigned x, unsigned y, char tipo, size_t ticksEntreMovs);
 
 int cmpEntidad(void* a, void* b);
 int cmpTipoEntidad(void* a, void* b);

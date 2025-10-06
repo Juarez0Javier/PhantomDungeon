@@ -1,15 +1,19 @@
 #include "main.h"
+#include <stdlib.h>
+#include <time.h>
 
 int main (int argc, char *argv[]) {
 
     ConfigData configs;
     GHP_TexturesData tex_data;
-
-    char* nameWindow = "Fantasmas";
-
     struct GHP_WindowData myWindow;
 
-    if (GHP_SetWindow(&myWindow, nameWindow, react, WIDTH, HEIGHT, &configs, &tex_data)) { // it returns true at the end of the partida
+    char* nameWindow = "Fantasmas";
+    
+    srand(time(NULL));
+
+    // Retorna true al final de la partida.
+    if (GHP_SetWindow(&myWindow, nameWindow, react, WIDTH, HEIGHT, &configs, &tex_data)) {
         GHP_DestroyTexturesData(&tex_data);
         GHP_freeBG(&tex_data);
         GHP_DestroyWindow(&myWindow);
@@ -20,18 +24,14 @@ int main (int argc, char *argv[]) {
 
 void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData) {
 
+    // Configuración, partida y eventos.
     ConfigData* configs = (ConfigData*) partidaData;
-
-    int seccion = SECCION_MENU, seccionPrev; // init seccion
-
     Partida partida;
-    iniciarPartida(&partida, configs, TexData, renderer);
-    //nullpartida(&partida);
+    SDL_Event event;
 
-    if (!iniciarPartida(&partida, configs, TexData, renderer)) {
-        printf("\nError in partida initalizing");
-        seccion=SECCION_SALIR_DIRECTO;
-    }
+    // Secciones.
+    int seccion = SECCION_MENU; // init seccion
+    int seccionPrev = seccion;
 
     Seccion secciones[] = { // BE CAREFUL!!! IT HAS SAME ORDER AS CONSTANTS MODE_*
         {initMenu, handlerMenu, NULL},
@@ -40,56 +40,62 @@ void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData)
         {initVictoria, handlerVictoria, NULL},
         {initVerConfigs, handlerVerConfigs, NULL}
     };
+    
+    // Relacionadas al control de frames.
+    unsigned inicioFrame, duracionFrame, ticksUltFrame, deltaTime;
 
-    if (seccion != SECCION_SALIR_DIRECTO) {
+    // Aplica todas las configuraciones previas al inicio de partida.
+    if (iniciarPartida(&partida, configs, TexData, renderer)) {
         secciones[seccion].init(renderer, &partida, TexData, configs, &seccion);
         SDL_RenderPresent(renderer);
+    } else {
+        printf("\nError en iniciar partida");
+        seccion = SECCION_SALIR_DIRECTO;
     }
 
-    SDL_Event event;
+    ticksUltFrame = SDL_GetTicks();
+
     while (seccion != SECCION_SALIR_DIRECTO) {
 
-        unsigned inicioFrame = SDL_GetTicks();
+        // Maneja los frames y calcula el deltaTime para que el juego se ejecute a la misma velocidad en cualquier equipo.
+        inicioFrame = SDL_GetTicks();
+        deltaTime = inicioFrame - ticksUltFrame; // Calcula cuantos ticks pasaron desde el frame anterior.
+        ticksUltFrame = inicioFrame;
 
-        while (SDL_PollEvent(&event) && seccion != SECCION_SALIR_DIRECTO) {
+        SDL_PollEvent(&event);
 
-            if (event.type == SDL_QUIT) {
-                seccion = SECCION_SALIR_DIRECTO;
-            }
+        if (event.type == SDL_QUIT)
+            seccion = SECCION_SALIR_DIRECTO;
 
-            else {
+        else {
+            secciones[seccion].handler(renderer, &partida, TexData, &event, &seccion, deltaTime);
 
+            if (seccion != SECCION_SALIR_DIRECTO && seccionPrev != seccion) {
+                SDL_Event discard;
+    
                 seccionPrev = seccion;
-                secciones[seccion].handler(renderer, &partida, TexData, &event, &seccion);
 
-                if (seccionPrev != seccion && seccion != SECCION_SALIR_DIRECTO) { // init function only when the seccion changes
+                // Limpia la cola de eventos de SDL al cambiar de sección.
+                while (SDL_PollEvent(&discard));
 
-                    SDL_Event discard;
-                    while (SDL_PollEvent(&discard)) {} // clear the queue of events
-
-                    secciones[seccion].init(renderer, &partida, TexData, configs, &seccion);
-                }
-
-                // updatepartidaTime(renderer, &partida, TexData, seccion); if needed should be here to update everytime
-
+                // Al cambiar de sección, se ejecuta el init de la nueva sección.
+                secciones[seccion].init(renderer, &partida, TexData, configs, &seccion);
             }
-
         }
 
-        if (secciones[seccion].render && seccion != SECCION_SALIR_DIRECTO) { // because some seccions could have no render
+        // Se comprueba esto ya que no todas las secciones renderizan algo.
+        if (seccion != SECCION_SALIR_DIRECTO && secciones[seccion].render) {
             secciones[seccion].render(renderer, &partida, TexData, &seccion);
             SDL_RenderPresent(renderer);
         }
 
-        unsigned duracionFrame = SDL_GetTicks() - inicioFrame;
+        // Controla y limita los frames máximos a los que trabaja el juego.
+        // Sin esto, cada frame duraría solamente lo que le toma procesar cada instrucción al equipo.
+        duracionFrame = SDL_GetTicks() - inicioFrame;
 
         if (duracionFrame < DELAY_DE_FRAMES)
             SDL_Delay(DELAY_DE_FRAMES - duracionFrame);
-
-        // updatepartidaTime(renderer, &partida, TexData, seccion); // It has to be twice to update each frame (with or without event)
-
     }
 
     destruirPartida(&partida);
-
 }

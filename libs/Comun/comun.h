@@ -9,8 +9,17 @@
 #define ERR_CONFIG 7
 #define NO_ENCONTRADO 8
 
+// Metodos de ordenamiento
+#define BURBUJEO 1
+#define SELECCION 2
+#define SELECCION_DOBLE 3
+#define INSERCION 4
+#define QUICK_SORT 5
+
 // Booleano propio
 #define true 1
 #define false 0
 
 typedef int bool;
+
+#define MIN(a,b) ((a)<(b)?(a):(b))

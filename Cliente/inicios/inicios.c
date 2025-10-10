@@ -46,43 +46,57 @@ int iniciarTexData(GHP_TexturesData* tex_data, SDL_Renderer* renderer, Partida* 
     int offset_to_centerY = (HEIGHT - partida->mapa.filas * 40) / 2;
     tex_data->active_mesh = (GHP_Mesh){offset_to_centerX, offset_to_centerY, &(tex_data->textures[0]), partida->mapa.filas, partida->mapa.cols};
 
+    tex_data->buttons = malloc(sizeof(GHP_Button)*AMMOUNT_BUTTONS);
+    tex_data->buttonsTexs = malloc(sizeof(GHP_Texture)*AMMOUNT_BUTTONS);
+    tex_data->buttons_loaded = 0;
+
+    if (iniciarBotones(renderer, tex_data) != OK)
+        return TEX_ERR;
+
+    return OK;
+}
+
+int iniciarBotones(SDL_Renderer* renderer, GHP_TexturesData* texData) {
+
+    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_MENU_CHICO], 132, 19, 248, 53, setSeccionMenu);
+    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_SALIR_CHICO], 312, 21, 428, 55, setSeccionSalir);
+    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_PAUSA_CHICO], 455, 21, 571, 55, setPausa);
+    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_JUGAR_GRANDE], 28, 85, 231, 165, setSeccionJugar);
+    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_SALIR_GRANDE], 283, 87, 486, 167, setSeccionSalir);
+    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_VERCONFIG_GRANDE], 546, 86, 749, 166, setSeccionConfigs);
+    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_MENU_GRANDE], 28, 195, 231, 275, setSeccionMenu);
+
+    for(int i=0; i<AMMOUNT_BUTTONS; i++) {
+        if (! (texData->buttons + i)->tex ) {
+            printf("\nError loading the buttons. Button %d.", i);
+            return TEX_ERR; // could be file
+        }
+    }
+
     return OK;
 }
 
 
 
+
+// reacciones de botones
+void setSeccionMenu(void* dataJuego, int* seccion) {*seccion = SECCION_MENU;}
+void setSeccionSalir(void* dataJuego, int* seccion) {*seccion = SECCION_SALIR_DIRECTO;}
+void setPausa(void* dataJuego, int* seccion) {((Partida*)dataJuego)->pausado = !((Partida*)dataJuego)->pausado;}
+void setSeccionJugar(void* dataJuego, int* seccion) {*seccion = SECCION_PARTIDA;}
+void setSeccionConfigs(void* dataJuego, int* seccion) {*seccion = SECCION_CONFIGS;}
+
 /*
 
-
-
-
     // mallocs for buttons and texts
-//    tex_data->buttons = malloc(sizeof(GHP_Button)*AMMOUNT_BUTTONS);
-//    tex_data->buttonsTexs = malloc(sizeof(GHP_Texture)*AMMOUNT_BUTTONS);
-//    tex_data->buttons_loaded = 0;
+
 //
 //    tex_data->texts = malloc(sizeof(GHP_Text)*AMMOUNT_TEXTS);
 //    tex_data->textsTexs = malloc(sizeof(GHP_Texture)*AMMOUNT_TEXTS);
 //    tex_data->texts_loaded = 0;
 //
-//    if (initButtons(renderer, tex_data) != OK) return TEX_ERR;
+
 //    if (initTexts(renderer, tex_data) != OK) return TEX_ERR;
-
-
-
-int iniciarBotones(SDL_Renderer* renderer, GHP_TexturesData* texData) {
-
-//    GHP_newButtonAbs(renderer, "img/buttons.png", texData, &texData->buttons[BUT_START], 0, 0, 289, 153, NULL);
-//
-//    for(int i=0; i<AMMOUNT_BUTTONS; i++) {
-//        if (! (texData->buttons + i)->tex ) {
-//            printf("\nError loading the buttons. Button %d.", i);
-//            return TEX_ERR; // could be file
-//        }
-//    }
-
-    return OK;
-}
 
 int iniciarTextos(SDL_Renderer* renderer, GHP_TexturesData* texData) {
 

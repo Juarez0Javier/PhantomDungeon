@@ -112,6 +112,8 @@ bool cargarMapaDeArchivo (Mapa* mapa, Entidad* jugador, Vector* fantasmas, const
     int i = 0, j, ticksEntreMovs;
     char casilla;
 
+    vectorVaciar(fantasmas); // quita si hubiera fantasmas precargados
+
     if (!archTxt)
         return false;
 

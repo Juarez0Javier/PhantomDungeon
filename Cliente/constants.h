@@ -71,8 +71,14 @@
 #define TEX_SALIDA 6
 #define TEX_VIDA 7
 // Texturas - Botones
-#define BUT_START 0
-#define AMMOUNT_BUTTONS 1
+#define BUT_MENU_CHICO 0
+#define BUT_SALIR_CHICO 1
+#define BUT_PAUSA_CHICO 2
+#define BUT_JUGAR_GRANDE 3
+#define BUT_SALIR_GRANDE 4
+#define BUT_VERCONFIG_GRANDE 5
+#define BUT_MENU_GRANDE 6
+#define AMMOUNT_BUTTONS 7
 // Texturas - Textos
 #define AMMOUNT_TEXTS 0
 

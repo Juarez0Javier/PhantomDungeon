@@ -9,7 +9,7 @@ int main (int argc, char *argv[]) {
     struct GHP_WindowData myWindow;
 
     char* nameWindow = "Fantasmas";
-    
+
     srand(time(NULL));
 
     // Retorna true al final de la partida.
@@ -40,7 +40,7 @@ void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData)
         {initVictoria, handlerVictoria, NULL},
         {initVerConfigs, handlerVerConfigs, NULL}
     };
-    
+
     // Relacionadas al control de frames.
     unsigned inicioFrame, duracionFrame, ticksUltFrame, deltaTime;
 
@@ -72,7 +72,7 @@ void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData)
 
             if (seccion != SECCION_SALIR_DIRECTO && seccionPrev != seccion) {
                 SDL_Event discard;
-    
+
                 seccionPrev = seccion;
 
                 // Limpia la cola de eventos de SDL al cambiar de sección.
@@ -80,6 +80,7 @@ void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData)
 
                 // Al cambiar de sección, se ejecuta el init de la nueva sección.
                 secciones[seccion].init(renderer, &partida, TexData, configs, &seccion);
+                SDL_RenderPresent(renderer); // algunos init renderizan cosas
             }
         }
 

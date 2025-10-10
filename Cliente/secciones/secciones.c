@@ -21,6 +21,11 @@ void initMenu(
     printf("'C': Ver configuracion\n");
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+
+    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
+    GHP_renderButton(renderer, &tex->buttons[BUT_SALIR_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.4);
+    GHP_renderButton(renderer, &tex->buttons[BUT_VERCONFIG_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.6);
+
 }
 
 void handlerMenu(
@@ -44,6 +49,8 @@ void handlerMenu(
                 break;
         }
     }
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_JUGAR_GRANDE], tex->buttons[BUT_SALIR_GRANDE], tex->buttons[BUT_VERCONFIG_GRANDE]};
+    handleButtonsClick(botonesActivos, 3, event->button.x, event->button.y, partida, seccion, event);
 }
 
 void initJuegoCorriendo (
@@ -70,6 +77,10 @@ void initJuegoCorriendo (
 
     mostrarMapa(&partida -> mapa);
     GHP_renderMesh(renderer, &(tex->active_mesh), 0);
+
+    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_CHICO], WIDTH*0.21, HEIGHT*0.01);
+    GHP_renderButton(renderer, &tex->buttons[BUT_PAUSA_CHICO], WIDTH*0.41, HEIGHT*0.01);
+    GHP_renderButton(renderer, &tex->buttons[BUT_SALIR_CHICO], WIDTH*0.61, HEIGHT*0.01);
 }
 
 void handleJuegoCorriendo (
@@ -117,7 +128,7 @@ void handleJuegoCorriendo (
                             &partida -> movs
                         );
                     }
-  
+
                     break;
 
                 case SDLK_ESCAPE:
@@ -160,6 +171,9 @@ void handleJuegoCorriendo (
         vaciarCola(&partida -> movs);
         vectorVaciar(&partida -> fantasmas);
     }
+
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_CHICO], tex->buttons[BUT_PAUSA_CHICO], tex->buttons[BUT_SALIR_CHICO]};
+    handleButtonsClick(botonesActivos, 3, event->button.x, event->button.y, partida, seccion, event);
 }
 
 void renderJuegoCorriendo (
@@ -185,6 +199,16 @@ void renderJuegoCorriendo (
         mostrarMapa(&partida -> mapa);
 
         actualizarMapaRender(renderer, &partida->mapa, tex, tex->active_mesh);
+        GHP_renderButton(renderer, &tex->buttons[BUT_PAUSA_CHICO], WIDTH*0.41, HEIGHT*0.01); // de vuelta porque sino queda como si estuviera pausado
+    } else {
+
+        // agrisando el boton de pausa y el tablero
+        SDL_Rect rectPausa = {tex->buttons[BUT_PAUSA_CHICO].curWindowX,tex->buttons[BUT_PAUSA_CHICO].curWindowY,tex->buttons[BUT_PAUSA_CHICO].tex->width,tex->buttons[BUT_PAUSA_CHICO].tex->height}; // could be any cell of texs, its only for the dimensions
+        SDL_SetRenderDrawColor(renderer, 214, 214, 214, 10);
+        SDL_RenderFillRect(renderer, &rectPausa);
+        SDL_Rect rectTablero = {tex->active_mesh.offsetX,tex->active_mesh.offsetY, tex->active_mesh.txtr->width*tex->active_mesh.cols, tex->active_mesh.txtr->height*tex->active_mesh.rows};
+        SDL_SetRenderDrawColor(renderer, 137, 137, 137, 2);
+        SDL_RenderFillRect(renderer, &rectTablero);
     }
 }
 
@@ -206,6 +230,7 @@ void initDerrota(
     mostrarLista(&partida -> regMovs, mostrarCoordenada);
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
     // Mostrar registro de movmientos.
 }
 
@@ -225,6 +250,8 @@ void handlerDerrota(
             *seccion = SECCION_PARTIDA;
             break;
     }
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
+    handleButtonsClick(botonesActivos, 1, event->button.x, event->button.y, partida, seccion, event);
 }
 
 void initVictoria(
@@ -245,6 +272,7 @@ void initVictoria(
     mostrarLista(&partida -> regMovs, mostrarCoordenada);
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
     // Mostrar registro de movmientos.
 }
 
@@ -264,6 +292,8 @@ void handlerVictoria(
             *seccion = SECCION_PARTIDA;
             break;
     }
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
+    handleButtonsClick(botonesActivos, 1, event->button.x, event->button.y, partida, seccion, event);
 }
 
 void initVerConfigs(
@@ -278,6 +308,7 @@ void initVerConfigs(
     printf("\nPresione enter para volver al menu...");
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
 }
 
 void handlerVerConfigs(
@@ -298,6 +329,8 @@ void handlerVerConfigs(
                 break;
         }
     }
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
+    handleButtonsClick(botonesActivos, 1, event->button.x, event->button.y, partida, seccion, event);
 }
 
 void handleButtonsClick(

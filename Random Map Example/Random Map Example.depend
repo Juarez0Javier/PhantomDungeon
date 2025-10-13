@@ -1,0 +1,29 @@
+# depslib dependency file v1.0
+1699708288 source:a:\escritorio\random map example\listasimple\lista utix.c
+
+1759921913 source:a:\escritorio\random map example\listasimple\lista_simple.c
+	"Lista_Simple.h"
+
+1760115948 a:\escritorio\random map example\listasimple\lista_simple.h
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	"../Nodo.h"
+
+1760115941 a:\escritorio\random map example\nodo.h
+
+1760213525 source:a:\escritorio\random map example\main.c
+	<stdio.h>
+	<stdlib.h>
+	"ListaSimple/Lista_Simple.h"
+	"ColaDina/Cola_Dinamica.h"
+
+1760133884 source:a:\escritorio\random map example\coladina\cola_dinamica.c
+	"Cola_Dinamica.h"
+
+1760133824 a:\escritorio\random map example\coladina\cola_dinamica.h
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	"../Nodo.h"
+

@@ -11,8 +11,7 @@ int generarMapaRandom(ConfigData* configData, char nombreArch[])
     //int fantasmas = configData->maximo_numero_fantasmas, premios = configData->maximo_numero_premios, vidas = configData->maximo_vidas_extra;
 
     char mapa[filas][columnas], item =' ';
-    int cardBloq[4], vecSel[4];
-    int selTam;
+    int cardBloq[4];
     tVector2 pos, dir, posS, posE;
     tPilaD stack;
 
@@ -44,28 +43,24 @@ int generarMapaRandom(ConfigData* configData, char nombreArch[])
     {
     case 0:
         pos.x = 0;
-
         dir.x = 1;
 
         break;
 
     case 1:
         pos.x = columnas - 1;
-
         dir.x = -1;
 
         break;
 
     case 2:
         pos.y = 0;
-
         dir.y = 1;
 
         break;
 
     case 3:
         pos.y = filas - 1;
-
         dir.y = -1;
 
         break;

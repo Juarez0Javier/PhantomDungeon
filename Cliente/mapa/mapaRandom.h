@@ -14,7 +14,10 @@ typedef struct
 } tVector2;
 
 int generarMapaRandom(ConfigData* configData, char nombreArch[]);
-void DirRandom (tVector2* dir, int cardInval[4]);
+void dirRandom (tVector2* dir, int cardInval[4]);
+
+void printMapa(int columnas, int filas, char mapa[filas][columnas]);
+void printMapaOnTxt(int columnas, int filas, char mapa[filas][columnas], FILE** file);
 
 int vector2ACard(tVector2 vec);
 tVector2 cardaVector2(int card);

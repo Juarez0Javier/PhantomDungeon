@@ -6,6 +6,7 @@
 #include "../inicios/inicios.h"
 #include "../partida/partida.h"
 #include "../mapa/mapa.h"
+#include"../mapa/mapaRandom.h"
 #include "../movimiento/movimiento.h"
 
 #define MAX_LEN_SETTINGS_TEXT 10

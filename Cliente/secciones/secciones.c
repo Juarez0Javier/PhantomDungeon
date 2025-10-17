@@ -70,6 +70,10 @@ void initJuegoCorriendo (
 
     vaciarLista(&partida -> regMovs);
 
+
+    if (!generarMapaRandom(configData,RUTA_LABERINTO_PRESET))
+        printf("Error genrando el mapa random.\n");
+
     // Le podriamos pasar el nombre del archivo de laberinto por argumentos a main.
     // Una vez tengamos el algoritmo generador, reemplazarlo ac�.
     if (!cargarMapaDeArchivo(&partida -> mapa, &partida -> jugador, &partida -> fantasmas, RUTA_LABERINTO_PRESET))

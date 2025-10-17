@@ -61,6 +61,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../libs/Lista/Lista.h" />
+		<Unit filename="../libs/Pila/Dina/Pila_Dinamica.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/Pila/Dina/Pila_Dinamica.h" />
 		<Unit filename="../libs/SDL2_linkNeededs/SDL.h" />
 		<Unit filename="../libs/SDL2_linkNeededs/SDL_assert.h" />
 		<Unit filename="../libs/SDL2_linkNeededs/SDL_atomic.h" />
@@ -173,6 +177,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="mapa/mapa.h" />
+		<Unit filename="mapa/mapaRandom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mapa/mapaRandom.h" />
 		<Unit filename="movimiento/movimiento.c">
 			<Option compilerVar="CC" />
 		</Unit>

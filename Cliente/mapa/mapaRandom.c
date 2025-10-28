@@ -4,14 +4,14 @@ int generarMapaRandom(ConfigData* configData, char nombreArch[])
 {
     ///Temporal. Hasta que se pueda cargar configuracion.
     int filas = 10, columnas = 10;
-    int fantasmas = 2, premios = 1, vidas = 1;
+    int fantasmas = 2, premios = 3, vidas = 2;
 
     ///Habilitar cuando se pueda cargar la configuracion
     //int filas = configData->filas, columnas = configData->columnas;
     //int fantasmas = configData->maximo_numero_fantasmas, premios = configData->maximo_numero_premios, vidas = configData->maximo_vidas_extra;
 
-    char mapa[filas][columnas], item =' ';
-    int cardBloq[4];
+    char mapa[filas][columnas], mapaEleccion[filas][columnas], item =' ';
+    int cardBloq[4], rangoSpawn = 2, rangoSpawnE = 3;
     tVector2 pos, dir, posS, posE;
     tPilaD stack;
 
@@ -112,7 +112,7 @@ int generarMapaRandom(ConfigData* configData, char nombreArch[])
 
         ///Si todas las direcciones no estan bloqueadas, definimos una direccion random para que se mueva
         if(!(cardBloq[0] == 1 && cardBloq[1] == 1 && cardBloq[2] == 1 && cardBloq[3] == 1))
-            dirRandom(&dir,cardBloq);
+            dir = dirRandom(cardBloq);
 
         pos.x += dir.x;
         pos.y += dir.y;
@@ -121,23 +121,23 @@ int generarMapaRandom(ConfigData* configData, char nombreArch[])
 
         ///Resolviendo el posicionamiento de la Salida candidata
 
-        if(pos.y == 1 && abs(posE.y - pos.y) > columnas / 2)
+        if(pos.y == 1 && posE.y == columnas - 1)
         {
             posS.y = pos.y - 1;
             posS.x = pos.x;
         }
-        if(pos.y == filas - 2 && abs(posE.y - pos.y) > columnas / 2)
+        if(pos.y == filas - 2 && posE.y == 0)
         {
             posS.y = pos.y + 1;
             posS.x = pos.x;
         }
-        if(pos.x == 1 && abs(posE.x - pos.x) > filas / 2)
+        if(pos.x == 1 && posE.x == filas - 1)
         {
             posS.y = pos.y;
             posS.x = pos.x - 1;
         }
 
-        if(pos.x == columnas - 2 && abs(posE.x - pos.x) > filas / 2)
+        if(pos.x == columnas - 2 && posE.x == 0)
         {
             posS.y = pos.y;
             posS.x = pos.x + 1;
@@ -149,7 +149,10 @@ int generarMapaRandom(ConfigData* configData, char nombreArch[])
 
     vaciarPilaD(&stack);
 
+
+
 ///Añadiendo "bulk" a los caminos (que sean un poquito mas grandes).
+
 
     for(int i = 1; i<filas - 1; i++)
     {
@@ -172,33 +175,66 @@ int generarMapaRandom(ConfigData* configData, char nombreArch[])
 
 ///Añadiendo Fantasmas, Premios y Vidas
 
-    item = 'F';
-    for(int i=0; i<fantasmas; i++)
-        apilarD(&stack,&item,sizeof(char));
 
+    memcpy(&mapaEleccion,&mapa,sizeof(mapa));
+
+
+    for(int i = posE.y - rangoSpawnE; i<posE.y + rangoSpawnE + 1; i++)
+    {
+        for(int j = posE.x - rangoSpawnE; j<posE.x + rangoSpawnE + 1; j++)
+        {
+            if(i > 0 && i < columnas && j > 0 && j < filas)
+                mapaEleccion[i][j] = '#';
+
+        }
+    }
+
+    /*
     item = 'P';
     for(int i=0; i<premios; i++)
-        apilarD(&stack,&item,sizeof(char));
+
 
     item = 'V';
     for(int i=0; i<vidas; i++)
         apilarD(&stack,&item,sizeof(char));
 
-    while(!pilaDVacia(&stack))
-    {
-        pos.x = 1 + (rand() % (filas - 2));
-        pos.y = 1 + (rand() % (columnas - 2));
+    item = 'F';
+    for(int i=0; i<fantasmas; i++)
+        apilarD(&stack,&item,sizeof(char));*/
 
-        if(mapa[pos.y][pos.x] == '.' && abs(posE.x - pos.x) > filas / 5 && abs(posE.y - pos.y) > columnas / 5)
+
+    while (fantasmas + premios + vidas > 0)
+    {
+
+        pos = posCaminoRandom(columnas,filas,mapaEleccion);
+
+        if (pos.x == -1)
+            break;
+
+        item = itemRandom(&fantasmas,&premios,&vidas);
+
+        mapa[pos.y][pos.x] = item;
+
+        for(int i = pos.y - rangoSpawn; i<pos.y + rangoSpawn + 1; i++)
         {
-            desapilarD(&stack,&item,sizeof(char));
-            mapa[pos.y][pos.x] = item;
+            for(int j = pos.x - rangoSpawn; j<pos.x + rangoSpawn + 1; j++)
+            {
+                if(i > 0 && i < columnas && j > 0 && j < filas)
+                    mapaEleccion[i][j] = '#';
+
+            }
         }
+
+
+        //printf("X = %d, Y = %d\n",pos.x,pos.y);
+        //printf("Mapa\n");
+        //printMapa(columnas,filas,mapa);
+        //printf("Mapa Eleccion\n");
+        //printMapa(columnas,filas,mapaEleccion);
+
     }
 
     vaciarPilaD(&stack);
-
-    //printMapa(columnas,filas,mapa);
 
     ///Imprimoendo el Mapa en el archivo de texto
 
@@ -206,13 +242,21 @@ int generarMapaRandom(ConfigData* configData, char nombreArch[])
 
     fclose(archTxt);
 
+    printMapa(columnas,filas,mapa);
+
+    //exit(0);
+
     return 1;
 }
 
-void dirRandom (tVector2* dir, int cardBloq[4])
+tVector2 dirRandom (int cardBloq[4])
 {
     int sel, vecSel[4] = {0,0,0,0};
     int vecTam = 0;
+
+    //printf("Proc\n");
+
+    tVector2 ret;
 
     for(int i = 0; i < 4; i++)
     {
@@ -225,9 +269,110 @@ void dirRandom (tVector2* dir, int cardBloq[4])
 
     sel = vecSel[rand() % vecTam];
 
-    dir->x = cardaVector2(sel).x;
-    dir->y = cardaVector2(sel).y;
+    ret.x = cardaVector2(sel).x;
+    ret.y = cardaVector2(sel).y;
+
+    //printf("X: %d, Y: %d\n",ret.x,ret.y);
+
+    return ret;
 }
+
+tVector2 posCaminoRandom (int columnas, int filas, char mapa[filas][columnas])
+{
+    tVector2 posDisp [(columnas * filas)], ret;
+    int cantCam = 0, sel;
+
+    for(int i = 0; i<filas; i++)
+    {
+        for(int j = 0; j<columnas; j++)
+        {
+            if (mapa[i][j] == '.')
+            {
+                posDisp[cantCam].x = j;
+                posDisp[cantCam].y = i;
+                cantCam++;
+            }
+        }
+    }
+
+    /*printf("------------------------\n");
+
+    for(int i = 0; i<cantCam; i++)
+    {
+        printf("X: %d, Y: %d\n",posDisp[i].x,posDisp[i].y);
+    }*/
+
+    if (cantCam == 0)
+    {
+        ret.x = -1;
+    }
+    else
+    {
+        sel = rand() % cantCam;
+
+        ret.x = posDisp[sel].x;
+        ret.y = posDisp[sel].y;
+    }
+
+    //printf("------------------------\n");
+
+    //printf("X: %d, Y: %d\n",ret.x,ret.y);
+
+    return ret;
+}
+
+char itemRandom (int* fantasmas, int* premios, int* vidas)
+{
+    char itemVec[(*fantasmas) + (*premios) + (*vidas)], vecSel[3] = {'F','P','V'}, ret;
+    int cantItem = 0;
+
+    for(int i=0; i<(*fantasmas); i++)
+    {
+        itemVec[cantItem] = 'F';
+        cantItem++;
+    }
+
+    for(int i=0; i<(*vidas); i++)
+    {
+        itemVec[cantItem] = 'V';
+        cantItem++;
+    }
+
+    for(int i=0; i<(*premios); i++)
+    {
+        itemVec[cantItem] = 'P';
+        cantItem++;
+    }
+
+    /*printf("------------------------\n");
+
+    for(int i = 0; i<cantItem; i++)
+    {
+        printf("%c",itemVec[i]);
+    }
+
+    printf("\n");*/
+
+    ret = itemVec[rand() % cantItem];
+
+    //printf("Item: %c\n",ret);
+
+    switch (ret)
+    {
+    case 'F':
+        (*fantasmas)--;
+        break;
+    case 'V':
+        (*vidas)--;
+        break;
+    case 'P':
+        (*premios)--;
+        break;
+    }
+
+    return ret;
+}
+
 
 void printMapa(int columnas, int filas, char mapa[filas][columnas])
 {

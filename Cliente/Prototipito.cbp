@@ -27,6 +27,7 @@
 					<Add library="SDL2main" />
 					<Add library="SDL2_ttf" />
 					<Add library="SDL2_image" />
+					<Add library="ws2_32" />
 					<Add directory="../libs/SDL2_linkNeededs" />
 					<Add directory="../libs" />
 					<Add directory="../libs/SDL2_more" />
@@ -57,6 +58,8 @@
 		</Unit>
 		<Unit filename="../libs/Cola/Cola.h" />
 		<Unit filename="../libs/Comun/comun.h" />
+		<Unit filename="../libs/Comun/conexion.h" />
+		<Unit filename="../libs/Comun/nodo.h" />
 		<Unit filename="../libs/Lista/Lista.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -148,6 +151,18 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../libs/Vector/Vector.h" />
+		<Unit filename="../libs/archBin/archBin.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/archBin/archBin.h" />
+		<Unit filename="../libs/conexion/modelos.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/conexion/modelos.h" />
+		<Unit filename="../libs/conexion/transporte.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/conexion/transporte.h" />
 		<Unit filename="../libs/graphics/graphics.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -156,6 +171,18 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../libs/matrizDinamica/dinMtx.h" />
+		<Unit filename="conexion/api.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="conexion/api.h" />
+		<Unit filename="conexion/conexion.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="conexion/conexion.h" />
+		<Unit filename="conexion/protocolo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="conexion/protocolo.h" />
 		<Unit filename="configs/configs.c">
 			<Option compilerVar="CC" />
 		</Unit>

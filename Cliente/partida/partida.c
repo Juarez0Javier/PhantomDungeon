@@ -26,4 +26,3 @@ void destruirPartida (Partida* partida) {
     destruirMatriz(partida -> mapa.filas, (void*) partida -> mapa.data);
     destruirMatriz(partida -> mapa.filas, (void*) partida -> mapa.entidades);
 }
-

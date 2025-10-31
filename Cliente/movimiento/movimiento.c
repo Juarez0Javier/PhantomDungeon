@@ -197,7 +197,7 @@ void resolverMovimientos (Partida* partida, Mapa* mapa, tCola* movs, int* seccio
         coord.x = mov.x;
         coord.y = mov.y;
 
-        if (!ponerEnListaAlFinal(&partida -> regMovs, &coord, sizeof(Coordenada), true, NULL)) 
+        if (!ponerEnListaAlFinal(&partida -> regMovs, &coord, sizeof(Coordenada)))
             printf("Error, memoria insuficiente para guardar movimiento\n");
 
     } else

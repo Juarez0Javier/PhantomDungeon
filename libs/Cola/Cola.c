@@ -35,7 +35,7 @@ bool ponerEnCola(tCola* c, const void* info, unsigned cantB) {
     return true;
 }
 
-bool sacarDeCola(tCola* c, void* info, unsigned cantB) { // Verificar que funque
+bool sacarDeCola(tCola* c, void* info, unsigned cantB) {
 
     tNodo* elim;
 

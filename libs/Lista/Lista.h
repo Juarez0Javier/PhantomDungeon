@@ -10,14 +10,16 @@ typedef void (*Imp) (const void* elem);
 typedef int (*Cmp) (const void* e1, const void* e2);
 
 void crearLista(tLista* pl);
-bool ponerEnListaAlPipio(tLista* pl, const void* info, unsigned cantB, bool conDup, Cmp cmp);
-bool ponerEnListaAlFinal(tLista* pl, const void* info, unsigned cantB, bool conDup, Cmp cmp);
+bool ponerEnListaAlInicio(tLista* pl, const void* info, unsigned tamInfo);
+bool ponerEnListaAlFinal(tLista* pl, const void* info, unsigned tamInfo);
+int ponerEnListaEnOrden(tLista* pl, const void* info, unsigned tamInfo, Cmp cmp, bool conDup, Acc acc, void* accExtra);
+bool sacarDeListaAlInicio(tLista* pl, void* info, unsigned tamInfo);
+bool sacarDeListaAlFinal(tLista* pl, void* info, unsigned tamInfo);
 void ordenarLista(tLista* pl, Cmp cmp, int metodo);
 int buscarEnLista(tLista* pl, const void* info, Cmp cmp);
 void vaciarLista(tLista* pl);
 void mostrarLista(const tLista* pl, Imp imp);
 bool listaVacia(const tLista* pl);
 bool listaLlena(const tLista* pl);
-
 
 #endif // TDALISTA_H_INCLUDED

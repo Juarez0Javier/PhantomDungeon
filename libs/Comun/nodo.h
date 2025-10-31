@@ -8,4 +8,10 @@ typedef struct sNodo {
     struct sNodo* sig;
 } tNodo;
 
+typedef struct sNodoA {
+    void* info;
+    unsigned tamInfo;
+    struct sNodoA *izq, *der;
+} tNodoA;
+
 #endif // NODO_H

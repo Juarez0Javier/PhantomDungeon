@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Servidor" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Servidor" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add library="ws2_32" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Servidor" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="../libs/Arbol/Arbol.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/Arbol/Arbol.h" />
+		<Unit filename="../libs/Cola/Cola.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/Cola/Cola.h" />
+		<Unit filename="../libs/Comun/comun.h" />
+		<Unit filename="../libs/Comun/conexion.h" />
+		<Unit filename="../libs/Comun/nodo.h" />
+		<Unit filename="../libs/Lista/Lista.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/Lista/Lista.h" />
+		<Unit filename="../libs/Vector/Vector.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/Vector/Vector.h" />
+		<Unit filename="../libs/archBin/archBin.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/archBin/archBin.h" />
+		<Unit filename="../libs/conexion/modelos.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/conexion/modelos.h" />
+		<Unit filename="../libs/conexion/transporte.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/conexion/transporte.h" />
+		<Unit filename="conexion.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="conexion.h" />
+		<Unit filename="constantes.h" />
+		<Unit filename="controladores/comun.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="controladores/comun.h" />
+		<Unit filename="controladores/jugador.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="controladores/jugador.h" />
+		<Unit filename="controladores/partida.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="controladores/partida.h" />
+		<Unit filename="controladores/ranking.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="controladores/ranking.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="peticiones.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="peticiones.h" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>

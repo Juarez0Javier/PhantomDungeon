@@ -1,16 +1,27 @@
+#include "./conexion/conexion.h"
+#include "./conexion/api.h"
+#include "../libs/conexion/modelos.h"
+#include "../libs/comun/conexion.h"
 #include "main.h"
 #include <stdlib.h>
 #include <time.h>
 
+void _imprimirRankingCompleto(void* elem, void* extra) {
+    RankingCompleto* ranking = (RankingCompleto*) elem;
+    printf("%d\t%s\t%d\n", ranking -> idJugador, ranking -> nombre, ranking -> puntTotal);
+}
+
 int main (int argc, char *argv[]) {
 
+    SOCKET sock;
     ConfigData configs;
     GHP_TexturesData tex_data;
     struct GHP_WindowData myWindow;
-
-    char* nameWindow = "Fantasmas";
+    char* nameWindow = "PhantomDungeon";
 
     srand(time(NULL));
+
+    sock = abrirConexion();
 
     // Retorna true al final de la partida.
     if (GHP_SetWindow(&myWindow, nameWindow, react, WIDTH, HEIGHT, &configs, &tex_data)) {
@@ -18,6 +29,9 @@ int main (int argc, char *argv[]) {
         GHP_freeBG(&tex_data);
         GHP_DestroyWindow(&myWindow);
     }
+
+    if (sock != INVALID_SOCKET)
+        cerrarConexion(sock);
 
     return 0;
 }

@@ -9,60 +9,125 @@ void crearLista(tLista* pl) {
     *pl = NULL;
 }
 
-bool ponerEnListaAlPipio(tLista* pl, const void* info, unsigned cantB, bool conDup, Cmp cmp) {
+bool ponerEnListaAlInicio(tLista* pl, const void* info, unsigned tamInfo) {
 
     tNodo* nue = (tNodo*) malloc(sizeof(tNodo));
-
-    if (!conDup && buscarEnLista(pl, info, cmp) != -1)
-        return false; // Duplicado
 
     if (!nue)
         return false;
 
-    nue -> info = malloc(cantB);
+    nue -> info = malloc(tamInfo);
 
-    if (!(nue -> info)) {
+    if (!nue -> info) {
         free(nue);
         return false;
     }
 
-    nue -> tamInfo = cantB;
-    memcpy(nue -> info, info, cantB);
-
+    memcpy(nue -> info, info, tamInfo);
+    nue -> tamInfo = tamInfo;
     nue -> sig = *pl;
     *pl = nue;
 
     return true;
 }
 
-bool ponerEnListaAlFinal(tLista* pl, const void* info, unsigned cantB, bool conDup, Cmp cmp) {
+bool ponerEnListaAlFinal(tLista* pl, const void* info, unsigned tamInfo) {
 
-    tNodo* nue;
-
-    if (!conDup && buscarEnLista(pl, info, cmp) != -1)
-        return false; // Duplicado
-
-    nue = (tNodo*) malloc(sizeof(tNodo));
+    tNodo* nue = (tNodo*) malloc(sizeof(tNodo));
 
     if (!nue)
         return false;
 
-    nue -> info = malloc(cantB);
+    nue -> info = malloc(tamInfo);
 
-    if (!(nue -> info)) {
+    if (!nue -> info) {
         free(nue);
         return false;
     }
 
-    nue -> tamInfo = cantB;
-    memcpy(nue -> info, info, cantB);
-
+    memcpy(nue -> info, info, tamInfo);
+    nue -> tamInfo = tamInfo;
     nue -> sig = NULL;
 
     while (*pl)
-        pl = &(*pl) -> sig;
+        pl = &((*pl) -> sig);
 
     *pl = nue;
+
+    return true;
+}
+
+int ponerEnListaEnOrden(tLista* pl, const void* info, unsigned tamInfo, Cmp cmp, bool conDup, Acc acc, void* accExtra) {
+
+    tNodo* nue;
+
+    while (*pl && cmp((*pl) -> info, info) < 0)
+        pl = &((*pl) -> sig);
+
+    if (*pl && cmp((*pl) -> info, info) == 0 && !conDup) {
+        if (acc) {
+            acc((*pl) -> info, accExtra);
+            return OK;
+        }
+
+        return DUPLICADO;
+    }
+
+    nue = (tNodo*) malloc(sizeof(tNodo));
+
+    if (!nue)
+        return SIN_MEM;
+
+    nue -> info = malloc(tamInfo);
+
+    if (!nue -> info) {
+        free(nue);
+        return SIN_MEM;
+    }
+
+    memcpy(nue -> info, info, tamInfo);
+    nue -> tamInfo = tamInfo;
+    nue -> sig = *pl;
+    *pl = nue;
+
+    return OK;
+}
+
+bool sacarDeListaAlInicio(tLista* pl, void* info, unsigned tamInfo) {
+
+    tNodo* elim;
+
+    if (*pl == NULL)
+        return false;
+
+    elim = *pl;
+    *pl = elim -> sig;
+
+    memcpy(info, elim -> info, MIN(elim -> tamInfo, tamInfo));
+
+    free(elim -> info);
+    free(elim);
+
+    return true;
+}
+
+bool sacarDeListaAlFinal(tLista* pl, void* info, unsigned tamInfo) {
+
+    tNodo* elim;
+
+    if (*pl == NULL)
+        return false;
+
+    while ((*pl) -> sig)
+        pl = &((*pl) -> sig);
+
+    elim = *pl;
+    *pl = elim -> sig;
+
+    memcpy(info, elim -> info, MIN(elim -> tamInfo, tamInfo));
+
+    free(elim -> info);
+    free(elim);
 
     return true;
 }

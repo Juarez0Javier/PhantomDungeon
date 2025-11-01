@@ -323,7 +323,10 @@ tVector2 posCaminoRandom (int columnas, int filas, char mapa[filas][columnas])
 
 char itemRandom (int* fantasmas, int* premios, int* vidas)
 {
-    char itemVec[(*fantasmas) + (*premios) + (*vidas)], vecSel[3] = {'F','P','V'}, ret;
+    char itemVec[(*fantasmas) + (*premios) + (*vidas)];
+    // Comentado momentaneamente por ser una variable no utilizada.
+    // char vecSel[3] = {'F','P','V'}
+    char ret;
     int cantItem = 0;
 
     for(int i=0; i<(*fantasmas); i++)

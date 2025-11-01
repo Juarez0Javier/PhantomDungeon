@@ -174,6 +174,20 @@ void vaciarLista(tLista* pl) {
     }
 }
 
+void recorrerLista(const tLista* pl, Acc acc) {
+    while (*pl) {
+        acc((*pl) -> info, NULL);
+        pl = &((*pl) -> sig);
+    }
+}
+
+void reducirLista(const tLista* pl, Acc acc, void* dst) {
+    while (*pl) {
+        acc((*pl) -> info, dst);
+        pl = &((*pl) -> sig);
+    }
+}
+
 void mostrarLista(const tLista* pl, Imp imp) {
 
     while (*pl) {

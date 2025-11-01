@@ -1,6 +1,7 @@
 #ifndef MENUS_H_INCLUDED
 #define MENUS_H_INCLUDED
 
+#include "../global.h"
 #include "../constants.h"
 #include "../configs/configs.h"
 #include "../inicios/inicios.h"
@@ -21,30 +22,30 @@
 //#include "otrasFunciones.h"
 
 typedef struct {
-    void (*init)(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-    void (*handler)(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* mode, unsigned deltaTime);
-    void (*render)(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, int* mode);
+    void (*init)(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+    void (*handler)(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
+    void (*render)(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 } Seccion;
 
 // here should be functions of specific menus
 // also the mesh updater
 // and the init, handler and render for each menu
 
-void initMenu(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handlerMenu(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* seccion, unsigned deltaTime);
+void initMenu(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handlerMenu(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
 
-void initJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handleJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, SDL_Event* event, int* seccion, unsigned deltaTime);
-void renderJuegoCorriendo (SDL_Renderer* renderer, Partida* partida, GHP_TexturesData* tex, int* mode);
+void initJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handleJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
+void renderJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 
-void initDerrota(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handlerDerrota(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* mode, unsigned deltaTime);
+void initDerrota(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handlerDerrota(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
 
-void initVictoria(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handlerVictoria(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* mode, unsigned deltaTime);
+void initVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handlerVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
 
-void initVerConfigs(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, ConfigData* configData, int* mode);
-void handlerVerConfigs(SDL_Renderer* renderer, Partida* game, GHP_TexturesData* tex, SDL_Event* event, int* seccion, unsigned deltaTime);
+void initVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
 
 // otros
 void handleButtonsClick(GHP_Button* buttons, int ammount, int x, int y, Partida* game, int* mode, SDL_Event* event);

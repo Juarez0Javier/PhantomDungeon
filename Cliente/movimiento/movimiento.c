@@ -1,13 +1,9 @@
 #include "movimiento.h"
 
-// Internas
-void resolverMovFantasma(Partida* partida, Mapa* mapa, Movimiento* mov, int* seccion);
-void colisionJugadorFantasma (Partida* partida, Mapa* mapa, Entidad* fantasmaCol, int* seccion);
+void _resolverMovFantasma(Partida* partida, Mapa* mapa, Movimiento* mov, int* seccion);
+void _colisionJugadorFantasma (Partida* partida, Mapa* mapa, Entidad* fantasmaCol, int* seccion);
 void reestablecerPosInicial (Entidad* e, Mapa* mapa);
-void aplicarMovimiento (Movimiento* mov, Mapa* mapa);
-
-
-// --------------------------- Principales ---------------------------
+void _aplicarMovimiento (Movimiento* mov, Mapa* mapa);
 
 // Calcula si el movimiento que quiere hacer el jugador es valido.
 void calcularMovJugador (Entidad* jugador, Mapa* mapa, char direccion, tCola* movs) {
@@ -171,7 +167,7 @@ void resolverMovimientos (Partida* partida, Mapa* mapa, tCola* movs, int* seccio
         entidadCol = mapa -> entidades[mov.y][mov.x];
 
         if (entidadCol) {
-            colisionJugadorFantasma(partida, mapa, entidadCol, seccion);
+            _colisionJugadorFantasma(partida, mapa, entidadCol, seccion);
             return;
         }
 
@@ -192,7 +188,7 @@ void resolverMovimientos (Partida* partida, Mapa* mapa, tCola* movs, int* seccio
                 break;
         }
 
-        aplicarMovimiento(&mov, mapa);
+        _aplicarMovimiento(&mov, mapa);
 
         coord.x = mov.x;
         coord.y = mov.y;
@@ -201,10 +197,10 @@ void resolverMovimientos (Partida* partida, Mapa* mapa, tCola* movs, int* seccio
             printf("Error, memoria insuficiente para guardar movimiento\n");
 
     } else
-        resolverMovFantasma(partida, mapa, &mov, seccion);
+        _resolverMovFantasma(partida, mapa, &mov, seccion);
 
     while (sacarDeCola(movs, &mov, sizeof(Movimiento)))
-        resolverMovFantasma(partida, mapa, &mov, seccion);
+        _resolverMovFantasma(partida, mapa, &mov, seccion);
 }
 
 void mostrarCoordenada (const void* coord) {
@@ -212,15 +208,18 @@ void mostrarCoordenada (const void* coord) {
     printf("(%d,%d) ", c -> x, c -> y);
 }
 
-// --------------------------- Internas ---------------------------
+void contarMovs (void* elem, void* dst) {
+    unsigned* cMovs = (unsigned*) dst;
+    (*cMovs)++;
+}
 
-void resolverMovFantasma (Partida* partida, Mapa* mapa, Movimiento* mov, int* seccion) {
+void _resolverMovFantasma (Partida* partida, Mapa* mapa, Movimiento* mov, int* seccion) {
 
     Entidad* entidadCol = mapa -> entidades[mov -> y][mov -> x];
 
     // Si no choca con nada, se mueve.
     if (!entidadCol) {
-        aplicarMovimiento(mov, mapa);
+        _aplicarMovimiento(mov, mapa);
         return;
     }
 
@@ -229,12 +228,12 @@ void resolverMovFantasma (Partida* partida, Mapa* mapa, Movimiento* mov, int* se
         return;
 
     // Aplica el movmiento para que se muestre, y luego procesa la colision.
-    aplicarMovimiento(mov, mapa);
-    colisionJugadorFantasma(partida, mapa, mov -> ent, seccion);
+    _aplicarMovimiento(mov, mapa);
+    _colisionJugadorFantasma(partida, mapa, mov -> ent, seccion);
 }
 
 // Devuelve a todas las entidades a su posicion inicial, eliminando al fantasma de la colision.
-void colisionJugadorFantasma (Partida* partida, Mapa* mapa, Entidad* fantasmaCol, int* seccion) {
+void _colisionJugadorFantasma (Partida* partida, Mapa* mapa, Entidad* fantasmaCol, int* seccion) {
     Entidad* pf;
     VectorIterador it;
 
@@ -269,7 +268,7 @@ void colisionJugadorFantasma (Partida* partida, Mapa* mapa, Entidad* fantasmaCol
     vaciarCola(&partida -> movs);
 }
 
-void aplicarMovimiento (Movimiento* mov, Mapa* mapa) {
+void _aplicarMovimiento (Movimiento* mov, Mapa* mapa) {
     // Mueve a la entidad en el mapa de entidades.
     mapa -> entidades[mov -> ent -> y][mov -> ent -> x] = NULL;
     mapa -> entidades[mov -> y][mov -> x] = mov -> ent;

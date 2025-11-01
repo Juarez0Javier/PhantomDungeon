@@ -1,15 +1,9 @@
 #include "secciones.h"
+#include "../conexion/api.h"
 
-void initMenu(
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    ConfigData* configData,
-    int* seccion
-) {
-    partida->jugador.num = 1;
-    partida->jugador.tipo = JUGADOR;
+void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador);
 
+void initMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
     system("cls");
 
     printf("=======================\n");
@@ -25,41 +19,44 @@ void initMenu(
     GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
     GHP_renderButton(renderer, &tex->buttons[BUT_SALIR_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.4);
     GHP_renderButton(renderer, &tex->buttons[BUT_VERCONFIG_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.6);
-
 }
 
-void handlerMenu(
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    SDL_Event* event,
-    int* seccion,
-    unsigned deltaTime
-) {
+void handlerMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+
+    GHP_Button botonesActivos[] = {
+        tex->buttons[BUT_JUGAR_GRANDE],
+        tex->buttons[BUT_SALIR_GRANDE],
+        tex->buttons[BUT_VERCONFIG_GRANDE]
+    };
+
     if (event->type == SDL_KEYDOWN) {
         switch (event -> key.keysym.sym) {
             case SDLK_RETURN:
-                *seccion = SECCION_PARTIDA;
+                cGlobal -> seccion = SECCION_PARTIDA;
                 break;
             case SDLK_ESCAPE:
-                *seccion = SECCION_SALIR_DIRECTO;
+                cGlobal -> seccion = SECCION_SALIR_DIRECTO;
                 break;
             case 'c':
-                *seccion = SECCION_CONFIGS;
+                cGlobal -> seccion = SECCION_CONFIGS;
                 break;
         }
     }
-    GHP_Button botonesActivos[] = {tex->buttons[BUT_JUGAR_GRANDE], tex->buttons[BUT_SALIR_GRANDE], tex->buttons[BUT_VERCONFIG_GRANDE]};
-    handleButtonsClick(botonesActivos, 3, event->button.x, event->button.y, partida, seccion, event);
+
+    handleButtonsClick(
+        botonesActivos,
+        3,
+        event->button.x,
+        event->button.y,
+        &(cGlobal -> partida),
+        &(cGlobal -> seccion),
+        event
+    );
 }
 
-void initJuegoCorriendo (
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    ConfigData* configData,
-    int* seccion
-) {
+void initJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+
+    Partida* partida = &(cGlobal -> partida);
 
     printf("Init juego\n");
 
@@ -68,10 +65,7 @@ void initJuegoCorriendo (
     partida -> premiosObt = 0;
     partida -> puntuacion = 0;
 
-    vaciarLista(&partida -> regMovs);
-
-
-    if (!generarMapaRandom(configData,RUTA_LABERINTO_PRESET))
+    if (!generarMapaRandom(&(cGlobal -> configData), RUTA_LABERINTO_PRESET))
         printf("Error genrando el mapa random.\n");
 
     // Le podriamos pasar el nombre del archivo de laberinto por argumentos a main.
@@ -87,14 +81,14 @@ void initJuegoCorriendo (
     GHP_renderButton(renderer, &tex->buttons[BUT_SALIR_CHICO], WIDTH*0.61, HEIGHT*0.01);
 }
 
-void handleJuegoCorriendo (
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    SDL_Event* event,
-    int* seccion,
-    unsigned deltaTime
-) {
+void handleJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+
+    Partida* partida = &(cGlobal -> partida);
+    GHP_Button botonesActivos[] = {
+        tex->buttons[BUT_MENU_CHICO],
+        tex->buttons[BUT_PAUSA_CHICO],
+        tex->buttons[BUT_SALIR_CHICO]
+    };
 
     if (event -> type == SDL_KEYDOWN) {
         char entrada = GHP_keyCodeToWASD(event -> key.keysym.sym);
@@ -107,7 +101,7 @@ void handleJuegoCorriendo (
                     break;
 
                 case SDLK_ESCAPE:
-                    *seccion = SECCION_MENU;
+                    cGlobal -> seccion = SECCION_MENU;
                     break;
             }
 
@@ -152,7 +146,7 @@ void handleJuegoCorriendo (
     if (!partida -> pausado) {
 
         // Si no puede moverse por cooldown, va aumentando los ticks hasta que eventualmente pueda moverse.
-        partida -> jugador.ticksUltimoMov += deltaTime;
+        partida -> jugador.ticksUltimoMov += cGlobal -> deltaTime;
 
         // Luego, calcula el movimiento de todos los fantasmas.
         calcularMovFantasmas(
@@ -160,34 +154,51 @@ void handleJuegoCorriendo (
             &partida -> mapa,
             &partida -> movs,
             &partida -> jugador,
-            deltaTime
+            cGlobal -> deltaTime
         );
 
         resolverMovimientos(
             partida,
             &partida -> mapa,
             &partida -> movs,
-            seccion
+            &(cGlobal -> seccion)
         );
     }
 
-    if (*seccion != SECCION_PARTIDA) {
+    if (cGlobal -> seccion != SECCION_PARTIDA) {
         vaciarCola(&partida -> movs);
         vectorVaciar(&partida -> fantasmas);
     }
 
-    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_CHICO], tex->buttons[BUT_PAUSA_CHICO], tex->buttons[BUT_SALIR_CHICO]};
-    handleButtonsClick(botonesActivos, 3, event->button.x, event->button.y, partida, seccion, event);
+
+    handleButtonsClick(
+        botonesActivos,
+        3,
+        event->button.x,
+        event->button.y, partida,
+        &(cGlobal -> seccion),
+        event
+    );
 }
 
-void renderJuegoCorriendo (
-    SDL_Renderer*
-    renderer,
-    Partida* partida,
-    GHP_TexturesData*
-    tex,
-    int* seccion
-) {
+void renderJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+
+    Partida* partida = &(cGlobal -> partida);
+
+    // could be any cell of texs, its only for the dimensions
+    SDL_Rect rectPausa = {
+        tex->buttons[BUT_PAUSA_CHICO].curWindowX,
+        tex->buttons[BUT_PAUSA_CHICO].curWindowY,
+        tex->buttons[BUT_PAUSA_CHICO].tex->width,
+        tex->buttons[BUT_PAUSA_CHICO].tex->height
+    };
+
+    SDL_Rect rectTablero = {
+        tex->active_mesh.offsetX,
+        tex->active_mesh.offsetY,
+        tex->active_mesh.txtr->width*tex->active_mesh.cols,
+        tex->active_mesh.txtr->height*tex->active_mesh.rows
+    };
 
     if (!partida -> pausado) {
         system("cls");
@@ -201,28 +212,22 @@ void renderJuegoCorriendo (
         printf("\n");
 
         mostrarMapa(&partida -> mapa);
-
         actualizarMapaRender(renderer, &partida->mapa, tex, tex->active_mesh);
-        GHP_renderButton(renderer, &tex->buttons[BUT_PAUSA_CHICO], WIDTH*0.41, HEIGHT*0.01); // de vuelta porque sino queda como si estuviera pausado
-    } else {
 
+        // De vuelta porque sino queda como si estuviera pausado.
+        GHP_renderButton(renderer, &tex->buttons[BUT_PAUSA_CHICO], WIDTH*0.41, HEIGHT*0.01);
+
+    } else {
         // agrisando el boton de pausa y el tablero
-        SDL_Rect rectPausa = {tex->buttons[BUT_PAUSA_CHICO].curWindowX,tex->buttons[BUT_PAUSA_CHICO].curWindowY,tex->buttons[BUT_PAUSA_CHICO].tex->width,tex->buttons[BUT_PAUSA_CHICO].tex->height}; // could be any cell of texs, its only for the dimensions
         SDL_SetRenderDrawColor(renderer, 214, 214, 214, 10);
         SDL_RenderFillRect(renderer, &rectPausa);
-        SDL_Rect rectTablero = {tex->active_mesh.offsetX,tex->active_mesh.offsetY, tex->active_mesh.txtr->width*tex->active_mesh.cols, tex->active_mesh.txtr->height*tex->active_mesh.rows};
         SDL_SetRenderDrawColor(renderer, 137, 137, 137, 2);
         SDL_RenderFillRect(renderer, &rectTablero);
     }
 }
 
-void initDerrota(
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    ConfigData* configData,
-    int* seccion
-) {
+void initDerrota (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+
     printf("\n");
     printf("=======================\n");
     printf("Perdiste!\n");
@@ -230,41 +235,38 @@ void initDerrota(
     printf("Escape: Salir al menu.\n");
     printf("=======================\n\n");
 
-    printf("Movimientos realizados:\n");
-    mostrarLista(&partida -> regMovs, mostrarCoordenada);
+    _procesarFinPartida(&(cGlobal -> partida), cGlobal -> socket, cGlobal -> idJugador);
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
     // Mostrar registro de movmientos.
 }
 
-void handlerDerrota(
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    SDL_Event* event,
-    int* seccion,
-    unsigned deltaTime
-) {
+void handlerDerrota(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
+
     switch (event -> key.keysym.sym) {
         case SDLK_ESCAPE:
-            *seccion = SECCION_MENU;
+            cGlobal -> seccion = SECCION_MENU;
             break;
         case SDLK_RETURN:
-            *seccion = SECCION_PARTIDA;
+            cGlobal -> seccion = SECCION_PARTIDA;
             break;
     }
-    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
-    handleButtonsClick(botonesActivos, 1, event->button.x, event->button.y, partida, seccion, event);
+
+    handleButtonsClick(
+        botonesActivos,
+        1,
+        event->button.x,
+        event->button.y,
+        &(cGlobal -> partida),
+        &(cGlobal -> seccion),
+        event
+    );
 }
 
-void initVictoria(
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    ConfigData* configData,
-    int* seccion
-) {
+void initVictoria (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+
     printf("\n");
     printf("=======================\n");
     printf("Ganaste!\n");
@@ -272,84 +274,112 @@ void initVictoria(
     printf("Escape: Salir al menu.\n");
     printf("=======================\n\n");
 
-    printf("Movimientos realizados:\n");
-    mostrarLista(&partida -> regMovs, mostrarCoordenada);
+    _procesarFinPartida(&(cGlobal -> partida), cGlobal -> socket, cGlobal -> idJugador);
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
     // Mostrar registro de movmientos.
 }
 
-void handlerVictoria(
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    SDL_Event* event,
-    int* seccion,
-    unsigned deltaTime
-) {
+void handlerVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
+
     switch (event -> key.keysym.sym) {
         case SDLK_ESCAPE:
-            *seccion = SECCION_MENU;
+            cGlobal -> seccion = SECCION_MENU;
             break;
         case SDLK_RETURN:
-            *seccion = SECCION_PARTIDA;
+            cGlobal -> seccion = SECCION_PARTIDA;
             break;
     }
-    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
-    handleButtonsClick(botonesActivos, 1, event->button.x, event->button.y, partida, seccion, event);
+
+    handleButtonsClick(
+        botonesActivos,
+        1,
+        event->button.x,
+        event->button.y,
+        &(cGlobal -> partida),
+        &(cGlobal -> seccion),
+        event
+    );
 }
 
-void initVerConfigs(
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    ConfigData* configData,
-    int* seccion
-) {
+void initVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
     printf("\nConfiguraciones:\n");
-    mostrarConfigs(configData);
+    mostrarConfigs(&(cGlobal -> configData));
     printf("\nPresione enter para volver al menu...");
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
 }
 
-void handlerVerConfigs(
-    SDL_Renderer* renderer,
-    Partida* partida,
-    GHP_TexturesData* tex,
-    SDL_Event* event,
-    int* seccion,
-    unsigned deltaTime
-) {
+void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
+
     if (event->type == SDL_KEYDOWN) {
         switch (event -> key.keysym.sym) {
             case SDLK_RETURN:
-                *seccion = SECCION_MENU;
+                cGlobal -> seccion = SECCION_MENU;
                 break;
             case SDLK_ESCAPE:
-                *seccion = SECCION_SALIR_DIRECTO;
+                cGlobal -> seccion = SECCION_SALIR_DIRECTO;
                 break;
         }
     }
-    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
-    handleButtonsClick(botonesActivos, 1, event->button.x, event->button.y, partida, seccion, event);
+
+    handleButtonsClick(
+        botonesActivos,
+        1,
+        event->button.x,
+        event->button.y,
+        &(cGlobal -> partida),
+        &(cGlobal -> seccion),
+        event
+    );
 }
 
-void handleButtonsClick(
-    GHP_Button* buttons,
-    int ammount,
-    int x,
-    int y,
-    Partida* partida,
-    int* seccion,
-    SDL_Event* event
-) {
-    for (int i=0; i<ammount; i++) {
-        if (event->type == SDL_MOUSEBUTTONDOWN && event->button.button == SDL_BUTTON_LEFT && GHP_clickInButton(x, y, buttons+i)) {
-            if ((buttons+i)->on_click)
-                (buttons+i)->on_click(partida, seccion);
+void handleButtonsClick(GHP_Button* botones, int cantidad, int x, int y, Partida* partida, int* seccion, SDL_Event* event) {
+    int i;
+
+    for (i = 0; i < cantidad; i++) {
+        if (
+            event->type == SDL_MOUSEBUTTONDOWN &&
+            event->button.button == SDL_BUTTON_LEFT &&
+            GHP_clickInButton(x, y, botones+i)
+        ) {
+            if ((botones+i)->on_click)
+                (botones+i)->on_click(partida, seccion);
         }
     }
+}
+
+void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador) {
+
+    unsigned idPartida, cMovs = 0;
+    bool err;
+
+    printf("Movimientos realizados:\n");
+
+    mostrarLista(&partida -> regMovs, mostrarCoordenada);
+    reducirLista(&partida -> regMovs, contarMovs, &cMovs);
+    vaciarLista(&partida -> regMovs);
+
+    // Una vez finaliza la partida, si puede, la guarda en el servidor.
+    if (socket != INVALID_SOCKET) {
+
+        err = !apiCrearPartida(
+            socket,
+            &idPartida,
+            idJugador,
+            partida -> puntuacion,
+            cMovs
+        );
+
+        if (err)
+            printf("\nError al crear la partida.\n");
+        else
+            printf("\nID de partida: %d.\n", idPartida);
+
+    } else
+        printf("\nNo se puede enviar al server.\n");
 }

@@ -19,4 +19,5 @@ typedef Partida GameState; // just in case
 bool crearPartida (Partida* partida);
 void destruirPartida (Partida* partida);
 
+
 #endif // GAMESTATE_H_INCLUDED

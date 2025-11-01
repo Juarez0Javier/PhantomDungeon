@@ -11,6 +11,7 @@ bool crearMapa(Mapa* mapa, int filas, int cols) {
 
     mapa->filas = filas;
     mapa->cols = cols;
+    mapa->semilla = 0;
     return true;
 }
 
@@ -20,6 +21,7 @@ void vaciarMapa(Mapa* mapa) {
             mapa->data[i][j] = '.';
         }
     }
+    mapa->semilla = 0;
 }
 
 void mostrarMapa (Mapa* mapa) {
@@ -38,7 +40,7 @@ void mostrarMapa (Mapa* mapa) {
 }
 
 // Esta funcion se adapta a cualquier mapa cargado, reservando ella misma el espacio para mapa segun lo necesario
-int cargarMapaDeArchivoNoSeguro(Mapa* mapa, char* rutaArch, Entidad* jugador, Vector* entidades) {
+int cargarMapaDeArchivoNoSeguro(Mapa* mapa, Entidad* jugador, Vector* entidades, char* rutaArch) {
     FILE* arch = fopen(rutaArch, "rt");
     if (!arch)
         return FILE_ERR;

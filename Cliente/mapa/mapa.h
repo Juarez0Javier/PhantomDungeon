@@ -7,6 +7,7 @@
 typedef struct {
     int filas;
     int cols;
+    size_t semilla;
     char** data;
     Entidad*** entidades;
 } Mapa;
@@ -15,7 +16,7 @@ typedef struct {
 bool crearMapa(Mapa* mapa, int filas, int cols);
 void mostrarMapa (Mapa* mapa);
 void vaciarMapa(Mapa* mapa);
-int cargarMapaDeArchivoNoSeguro(Mapa* mapa, char* rutaArch, Entidad* jugador, Vector* entidades);
+int cargarMapaDeArchivoNoSeguro(Mapa* mapa, Entidad* jugador, Vector* entidades, char* rutaArch);
 bool cargarMapaDeArchivo (Mapa* mapa, Entidad* jugador, Vector* fantasmas, const char* nomArch);
 char colisionConMapa(Entidad* entidad, Mapa* mapa, char direccion);
 

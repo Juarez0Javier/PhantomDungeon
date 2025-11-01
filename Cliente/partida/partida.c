@@ -1,6 +1,6 @@
 #include "partida.h"
 
-bool crearPartida (Partida* partida) {
+bool crearPartida (Partida* partida, int filas, int cols) {
 
     crearCola(&partida -> movs);
     crearLista(&partida -> regMovs);
@@ -10,7 +10,7 @@ bool crearPartida (Partida* partida) {
         return false;
     }
 
-    if (!crearMapa(&(partida -> mapa), CONFIG_FILAS, CONFIG_COLS)) {
+    if (!crearMapa(&(partida -> mapa), filas, cols)) {
         printf("Error de memoria creando el mapa.\n");
         vectorDestruir(&partida -> fantasmas);
         return false;

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 /*
 void** newDinMtx(unsigned rows, unsigned cols, unsigned len);
@@ -11,5 +12,6 @@ void destroyDinMtx(unsigned rows, unsigned cols, unsigned len, void** mtx);
 */
 void** crearMatriz(unsigned rows, unsigned cols, unsigned len);
 void destruirMatriz(unsigned rows, void** mtx);
+void copiarMatriz(void** dst, void** src, unsigned filas, unsigned cols, unsigned len);
 
 #endif // DINMTX_H_INCLUDED

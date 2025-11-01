@@ -427,6 +427,10 @@ bool redimensionarVector (Vector* v, int operacion) {
     return true;
 }
 
+void* vectorPunteroAlUltimoElem(const Vector* v) {
+    return v->vec + (v->tam-1) * v->tamElem;
+}
+
 // void ordenarBurbujeo (Vector* v, Cmp cmp) {
 
 //     int i;

@@ -5,9 +5,10 @@ bool iniciarConfig(ConfigData* configs) {
     Vector campos;
     char buffer[TAM_LINEA + 1];
     campoConfig campoBuffer;
+    int camposLeidos = 0;
     FILE* archConfigs = fopen(RUTA_CONFIGS, "rt");
 
-    if (archConfigs)
+    if (!archConfigs)
         return false;
 
     vectorCrear(&campos, sizeof(campoConfig));
@@ -30,7 +31,11 @@ bool iniciarConfig(ConfigData* configs) {
         int pos = vectorDesordBuscar(&campos, camposValidos[i].argumento, cmpCampoTxt);
         campoConfig* campConf = (campoConfig*)campos.vec + pos;
         *(camposValidos[i].p) = campConf->valor;
+        camposLeidos++;
     }
+
+    if (camposLeidos < sizeof(camposValidos)/sizeof(campoValido))
+        return false;
 
     mostrarConfigs(configs);
 
@@ -49,7 +54,7 @@ bool validarConfig(ConfigData* configs) {
     );
 }
 
-void aplicarConfig(ConfigData* configs, GameState* game) { // to put in game the configs
+void aplicarConfig(ConfigData* configs, Partida* partida) {
 
 }
 
@@ -66,7 +71,10 @@ bool resetConfig() {
     FILE* archConfig = fopen("config.txt", "wt");
     if (!archConfig)
         return false;
-    printf("filas: 10\ncolumnas: 10\nvidas_inicio: 3\nmaximo_numero_fantasmas: 2\nmaximo_numero_premios: 1\nmaximo_vidas_extra: 1\n");
+    fprintf(archConfig, "filas: %d\ncolumnas: %d\nvidas_inicio: %d\nmaximo_numero_fantasmas: %d\nmaximo_numero_premios: %d\nmaximo_vidas_extra: %d\n",
+        CONFIG_FILAS, CONFIG_COLS, CONFIG_VIDAS, CONFIG_MAX_NUM_FANT, CONFIG_MAX_NUM_PREM, CONFIG_MAX_VIDAS_EXTRA
+    );
+    fclose(archConfig);
     return true;
 }
 

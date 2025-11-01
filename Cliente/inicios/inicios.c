@@ -9,9 +9,7 @@ bool iniciarPartida(Partida* partida, ConfigData* configs, GHP_TexturesData* Tex
         iniciarConfig(configs);
     }
 
-    aplicarConfig(configs, partida);
-
-    if (!crearPartida(partida)) {
+    if (!crearPartida(partida, configs->filas, configs->columnas)) {
         printf("Error creando la configuracion de partida");
     }
 

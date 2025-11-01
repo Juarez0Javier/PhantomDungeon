@@ -38,6 +38,9 @@
 #define CONFIG_FILAS 10
 #define CONFIG_COLS 10
 #define CONFIG_VIDAS 1
+#define CONFIG_MAX_NUM_FANT 3
+#define CONFIG_MAX_NUM_PREM 2
+#define CONFIG_MAX_VIDAS_EXTRA 3
 // Configuracion de video
 #define FPS 30
 #define DELAY_DE_FRAMES 1000/FPS
@@ -45,7 +48,7 @@
 
 
 // Rutas
-#define RUTA_LABERINTO_PRESET "./laberintos/laberinto.txt"
+#define RUTA_LABERINTO_PRESET "./laberintos/laberintoDefault.txt"
 #define RUTA_CONFIGS "./config.txt"
 #define RUTA_FONDO "./src/img/background.png"
 #define PATH_ASSET "./src/img/asset.png"
@@ -91,6 +94,7 @@
 #define GRAL_ERR 4
 #define TEX_ERR 5
 #define MOV_IMPOSIBLE 6
+#define ERR_MAPA 7
 
 // Representacion de objetos
 #define JUGADOR 'J'
@@ -108,5 +112,8 @@
 #define IZQUIERDA 'a'
 #define DERECHA 'd'
 
+#define PORCENTAJE_CORTE_PAREDES 40
+#define MAX_ITER_RAND 999
+#define TICKS_ENTRE_MOVS_FANTASMA_NORMAL 250
 
 #endif // CONSTANTS_H_INCLUDED

@@ -16,7 +16,7 @@ typedef struct {
 
 typedef Partida GameState; // just in case
 
-bool crearPartida (Partida* partida);
+bool crearPartida (Partida* partida, int filas, int cols);
 void destruirPartida (Partida* partida);
 
 

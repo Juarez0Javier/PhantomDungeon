@@ -65,17 +65,24 @@ void initJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_T
     partida -> premiosObt = 0;
     partida -> puntuacion = 0;
 
-    if (!generarMapaRandom(&(cGlobal -> configData), RUTA_LABERINTO_PRESET))
+    if (generarMapaRandom(&(cGlobal -> configData), &cGlobal->partida, RUTA_LABERINTO_PRESET) != OK)
         printf("Error genrando el mapa random.\n");
 
+    /*
     // Le podriamos pasar el nombre del archivo de laberinto por argumentos a main.
     // Una vez tengamos el algoritmo generador, reemplazarlo ac�.
-    if (!cargarMapaDeArchivo(&partida -> mapa, &partida -> jugador, &partida -> fantasmas, RUTA_LABERINTO_PRESET))
+    //if (!cargarMapaDeArchivo(&partida -> mapa, &partida -> jugador, &partida -> fantasmas, RUTA_LABERINTO_PRESET))
+    if (cargarMapaDeArchivoNoSeguro(&partida -> mapa, &partida -> jugador, &partida -> fantasmas, RUTA_LABERINTO_PRESET) != OK) {
         printf("Error cargando el mapa del archivo.\n");
+        cGlobal->seccion = SECCION_MENU;
+    } else {
+        mostrarMapa(&partida -> mapa);
+        GHP_renderMesh(renderer, &(tex->active_mesh), 0);
+    }
+    */
 
     mostrarMapa(&partida -> mapa);
     GHP_renderMesh(renderer, &(tex->active_mesh), 0);
-
     GHP_renderButton(renderer, &tex->buttons[BUT_MENU_CHICO], WIDTH*0.21, HEIGHT*0.01);
     GHP_renderButton(renderer, &tex->buttons[BUT_PAUSA_CHICO], WIDTH*0.41, HEIGHT*0.01);
     GHP_renderButton(renderer, &tex->buttons[BUT_SALIR_CHICO], WIDTH*0.61, HEIGHT*0.01);
@@ -165,12 +172,6 @@ void handleJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP
         );
     }
 
-    if (cGlobal -> seccion != SECCION_PARTIDA) {
-        vaciarCola(&partida -> movs);
-        vectorVaciar(&partida -> fantasmas);
-    }
-
-
     handleButtonsClick(
         botonesActivos,
         3,
@@ -179,6 +180,11 @@ void handleJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP
         &(cGlobal -> seccion),
         event
     );
+
+    if (cGlobal -> seccion != SECCION_PARTIDA) {
+        vaciarCola(&partida -> movs);
+        vectorVaciar(&partida -> fantasmas);
+    }
 }
 
 void renderJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {

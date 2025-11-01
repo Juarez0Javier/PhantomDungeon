@@ -8,27 +8,28 @@ typedef struct
 {
     int x;
     int y;
-} tVector2;
+} tPos;
 
 int generarMapaRandom(ConfigData* configData, Partida* partida, char nombreArch[]);
-void generarEntradaYPrimerEspacio(tVector2* pos, tVector2* dirMov, tVector2* posE, int filas, int cols, char** mapa);
-void chequearPosiblesMovimientos(int cardBloq[4], tVector2 pos, int filas, int columnas, char** mapa);
+void generarEntradaYPrimerEspacio(tPos* pos, tPos* dirMov, tPos* posE, int filas, int cols, char** mapa);
+void chequearPosiblesMovimientos(int cardBloq[4], tPos pos, int filas, int columnas, char** mapa);
 bool ningunMovimientoPosible(int cardBloq[4]);
-void posicionarSalidaCandidata(tVector2* posS, tVector2 pos, tVector2 posE, int filas, int columnas);
-void taparRadioRespectoAPosEnMascara(tVector2 pos, int rango, int filas, int cols, char** mapaMascara);
-void generarCaminosSimples(tVector2 pos, tVector2 dirMov, tVector2 posE, int filas, int cols, char** mapa);
-int insertarEntidades(tVector2 posE, int fantasmas, int premios, int vidas, int filas, int cols, char** mapa, Partida* partida);
+void posicionarSalidaCandidata(tPos* posS, tPos pos, tPos posE, int filas, int columnas);
+void taparRadioRespectoAPosEnMascara(tPos pos, int rango, int filas, int cols, char** mapaMascara);
+void generarCaminosSimples(tPos pos, tPos dirMov, tPos posE, int filas, int cols, char** mapa);
+int insertarEntidadesEnMapa(tPos posE, int fantasmas, int premios, int vidas, int filas, int cols, char** mapa, Partida* partida);
+void insertarFantasmasEnMapaEntidades(int filas, int cols, char** mapa, Vector* fantasmas, Entidad*** mapaEntidades);
 void cortarParedesParaMasCaminos(int filas, int cols, char** mapa);
 
-tVector2 dirRandom (int cardBloq[4]);
-tVector2 posCaminoRandom (int columnas, int filas, char** mapa);
+tPos dirRandom (int cardBloq[4]);
+tPos posCaminoRandom (int columnas, int filas, char** mapa);
 
 char itemRandom (int* fantasmas, int* premios, int* vidas);
 
 void printMapa(int columnas, int filas, char** mapa);
 void printMapaOnTxt(int columnas, int filas, char** mapa, FILE** file);
 
-int vector2ACard(tVector2 vec);
-tVector2 cardaVector2(int card);
+int vector2ACard(tPos vec);
+tPos cardaVector2(int card);
 
 #endif // MAPARANDOM_H_INCLUDED

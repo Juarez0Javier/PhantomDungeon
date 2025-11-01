@@ -16,7 +16,7 @@ void initMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesDat
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
 
-    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
+    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE_A_NOMBRE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
     GHP_renderButton(renderer, &tex->buttons[BUT_SALIR_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.4);
     GHP_renderButton(renderer, &tex->buttons[BUT_VERCONFIG_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.6);
 }
@@ -24,7 +24,7 @@ void initMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesDat
 void handlerMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
 
     GHP_Button botonesActivos[] = {
-        tex->buttons[BUT_JUGAR_GRANDE],
+        tex->buttons[BUT_JUGAR_GRANDE_A_NOMBRE],
         tex->buttons[BUT_SALIR_GRANDE],
         tex->buttons[BUT_VERCONFIG_GRANDE]
     };
@@ -32,7 +32,7 @@ void handlerMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textures
     if (event->type == SDL_KEYDOWN) {
         switch (event -> key.keysym.sym) {
             case SDLK_RETURN:
-                cGlobal -> seccion = SECCION_PARTIDA;
+                cGlobal -> seccion = SECCION_INGRESO_NOMBRE;
                 break;
             case SDLK_ESCAPE:
                 cGlobal -> seccion = SECCION_SALIR_DIRECTO;
@@ -344,6 +344,52 @@ void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Tex
     );
 }
 
+void initIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH - tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
+    strcpy(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text,"\0");
+
+    strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text,"Ingrese Nombre:");
+    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 40, WHITE_COLOR);
+    //GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREJUGADOR].tex, 52, 253);
+    //GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREMENSAJE].tex, 52, 100);
+    //dibujarRectanguloParaEntrada(renderer);
+}
+
+void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+    GHP_Button buttons[] = {tex->buttons[BUT_JUGAR_GRANDE]};
+    handleButtonsClick(buttons, 1, event->button.x, event->button.y, &cGlobal->partida, &cGlobal->seccion, event);
+
+    if (event->type == SDL_TEXTINPUT) {
+        if (strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text)+1 < MAX_LONG_NOMBRE_JUG) {
+            strcat(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text, event->text.text);
+            GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 40, WHITE_COLOR);
+        }
+    } else if (event->type == SDL_KEYDOWN && event->key.keysym.sym == SDLK_BACKSPACE) {
+        if (strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text) > 0) {
+            tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text)-1] = '\0';
+            GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 40, WHITE_COLOR);
+        }
+    }
+
+    if (event->type == SDL_KEYDOWN && event -> key.keysym.sym==SDLK_RETURN)
+        cGlobal -> seccion = SECCION_PARTIDA;
+
+    if (cGlobal->seccion != SECCION_INGRESO_NOMBRE) {
+        GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+        strcpy(cGlobal->partida.nombreJugador, tex->texts[TEXT_ENTRADANOMBREJUGADOR].text);
+    }
+}
+
+void renderIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+    GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREJUGADOR].tex, 52, 253);
+    GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREMENSAJE].tex, 52, 200);
+    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH-tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
+    dibujarRectanguloParaEntrada(renderer);
+}
+
+
 void handleButtonsClick(GHP_Button* botones, int cantidad, int x, int y, Partida* partida, int* seccion, SDL_Event* event) {
     int i;
 
@@ -389,3 +435,10 @@ void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador) {
     } else
         printf("\nNo se puede enviar al server.\n");
 }
+
+void dibujarRectanguloParaEntrada(SDL_Renderer* renderer) {
+    SDL_Rect rect = {50, 250, WIDTH-50*2, 50};
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawRect(renderer, &rect);
+}
+

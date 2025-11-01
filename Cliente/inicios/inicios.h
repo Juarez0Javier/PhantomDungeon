@@ -16,5 +16,6 @@ void setSeccionSalir(void* dataJuego, int* seccion);
 void setPausa(void* dataJuego, int* seccion);
 void setSeccionJugar(void* dataJuego, int* seccion);
 void setSeccionConfigs(void* dataJuego, int* seccion);
+void setSeccionIngresoNombre(void* dataJuego, int* seccion);
 
 #endif // INIT_H_INCLUDED

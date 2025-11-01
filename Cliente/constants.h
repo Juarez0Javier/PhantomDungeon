@@ -38,8 +38,8 @@
 #define CONFIG_FILAS 10
 #define CONFIG_COLS 10
 #define CONFIG_VIDAS 1
-#define CONFIG_MAX_NUM_FANT 3
-#define CONFIG_MAX_NUM_PREM 2
+#define CONFIG_MAX_NUM_FANT 2
+#define CONFIG_MAX_NUM_PREM 3
 #define CONFIG_MAX_VIDAS_EXTRA 3
 // Configuracion de video
 #define FPS 30
@@ -59,6 +59,7 @@
 #define SECCION_DERROTA 2
 #define SECCION_VICTORIA 3
 #define SECCION_CONFIGS 4
+#define SECCION_INGRESO_NOMBRE 5
 #define SECCION_SALIR_DIRECTO -1
 
 // Texturas - General
@@ -81,9 +82,14 @@
 #define BUT_SALIR_GRANDE 4
 #define BUT_VERCONFIG_GRANDE 5
 #define BUT_MENU_GRANDE 6
-#define AMMOUNT_BUTTONS 7
+#define BUT_JUGAR_GRANDE_A_NOMBRE 7
+#define AMMOUNT_BUTTONS 8
 // Texturas - Textos
-#define AMMOUNT_TEXTS 0
+#define TEXT_ENTRADANOMBREJUGADOR 0
+// ranking tops quedan reservados numeros 1-20
+#define TEXT_RANKING_CABECERA 21
+#define TEXT_ENTRADANOMBREMENSAJE 22
+#define AMMOUNT_TEXTS 23
 
 // Valores de retorno
 #define NO_ESTABLECIDO -1
@@ -112,8 +118,9 @@
 #define IZQUIERDA 'a'
 #define DERECHA 'd'
 
-#define PORCENTAJE_CORTE_PAREDES 40
+#define PORCENTAJE_CORTE_PAREDES 80
+#define TICKS_ENTRE_MOVS_FANTASMA_NORMAL 500
 #define MAX_ITER_RAND 999
-#define TICKS_ENTRE_MOVS_FANTASMA_NORMAL 250
+#define MAX_LONG_NOMBRE_JUG 25
 
 #endif // CONSTANTS_H_INCLUDED

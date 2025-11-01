@@ -51,6 +51,13 @@ int iniciarTexData(GHP_TexturesData* tex_data, SDL_Renderer* renderer, Partida* 
     if (iniciarBotones(renderer, tex_data) != OK)
         return TEX_ERR;
 
+    tex_data->texts = malloc(sizeof(GHP_Text)*AMMOUNT_TEXTS);
+    tex_data->textsTexs = malloc(sizeof(GHP_Texture)*AMMOUNT_TEXTS);
+    tex_data->texts_loaded = 0;
+
+    if (iniciarTextos(renderer, tex_data) != OK)
+        return TEX_ERR;
+
     return OK;
 }
 
@@ -63,6 +70,7 @@ int iniciarBotones(SDL_Renderer* renderer, GHP_TexturesData* texData) {
     GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_SALIR_GRANDE], 283, 87, 486, 167, setSeccionSalir);
     GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_VERCONFIG_GRANDE], 546, 86, 749, 166, setSeccionConfigs);
     GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_MENU_GRANDE], 28, 195, 231, 275, setSeccionMenu);
+    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_JUGAR_GRANDE_A_NOMBRE], 28, 85, 231, 165, setSeccionIngresoNombre);
 
     for(int i=0; i<AMMOUNT_BUTTONS; i++) {
         if (! (texData->buttons + i)->tex ) {
@@ -74,7 +82,22 @@ int iniciarBotones(SDL_Renderer* renderer, GHP_TexturesData* texData) {
     return OK;
 }
 
+int iniciarTextos(SDL_Renderer* renderer, GHP_TexturesData* texData) {
+    SDL_Color whiteColor = {255, 255, 255, 255};
+    char path[] = "fnt/Consolas-Regular.ttf";
+    for (int i=0; i<AMMOUNT_TEXTS; i++) {
+        GHP_newText(renderer, path, texData, &(texData->texts[i]), -1, -1, -1, whiteColor);
+        texData->texts[i].text[0] = '\0';
+    }
 
+    for(int i=0; i<AMMOUNT_TEXTS; i++) {
+        if (! (texData->texts + i)->tex ) {
+            printf("\nError loading the textures. Texture %d.", i);
+            return TEX_ERR;
+        }
+    }
+    return OK;
+}
 
 
 // reacciones de botones
@@ -83,21 +106,4 @@ void setSeccionSalir(void* dataJuego, int* seccion) {*seccion = SECCION_SALIR_DI
 void setPausa(void* dataJuego, int* seccion) {((Partida*)dataJuego)->pausado = !((Partida*)dataJuego)->pausado;}
 void setSeccionJugar(void* dataJuego, int* seccion) {*seccion = SECCION_PARTIDA;}
 void setSeccionConfigs(void* dataJuego, int* seccion) {*seccion = SECCION_CONFIGS;}
-
-/*
-
-    // mallocs for buttons and texts
-
-//
-//    tex_data->texts = malloc(sizeof(GHP_Text)*AMMOUNT_TEXTS);
-//    tex_data->textsTexs = malloc(sizeof(GHP_Texture)*AMMOUNT_TEXTS);
-//    tex_data->texts_loaded = 0;
-//
-
-//    if (initTexts(renderer, tex_data) != OK) return TEX_ERR;
-
-int iniciarTextos(SDL_Renderer* renderer, GHP_TexturesData* texData) {
-
-    return OK;
-}
-*/
+void setSeccionIngresoNombre(void* dataJuego, int* seccion) {*seccion = SECCION_INGRESO_NOMBRE;}

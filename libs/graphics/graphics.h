@@ -24,6 +24,9 @@
 #define GHP_TEXT_EXTRA_LIMIT 50
 #define GHP_LIMIT_PATH 51
 
+#define WHITE_COLOR (SDL_Color){255, 255, 255, 255}
+#define BLACK_COLOR (SDL_Color){0,0,0,255}
+
 struct GHP_WindowData {
     SDL_Window *window;
     SDL_Renderer *renderer;

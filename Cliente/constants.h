@@ -75,7 +75,7 @@
 #define SECCION_SALIR_DIRECTO -1
 
 // Rankings
-#define LIMITE_RANKINGS 10
+#define LIMITE_RANKINGS 2
 
 // Texturas - General
 #define AMMOUNT_ASSETS 1
@@ -102,6 +102,8 @@
 // Texturas - Textos
 #define TEXT_ENTRADANOMBREJUGADOR 0
 #define TEXT_ERR_NOMBRE_JUGADOR 1
+
+#define INICIO_TEXTOS_RANKINGS 2
 
 // ranking tops quedan reservados numeros 1-20
 // rango de reserva?

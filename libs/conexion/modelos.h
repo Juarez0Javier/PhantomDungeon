@@ -8,8 +8,8 @@
 typedef struct {
     unsigned id;
     char nombre[TAM_NOMBRE +1];
-    char email[TAM_NOMBRE +1];
-    char contrasenia[TAM_NOMBRE +1];
+    char email[TAM_EMAIL +1];
+    char contrasenia[TAM_CONTRASENIA +1];
 } Jugador;
 
 typedef struct {
@@ -32,7 +32,9 @@ typedef struct {
 } RankingCompleto;
 
 int cmpJugRankings (const void* r1, const void* r2);
+int cmpPuntRankings (const void* r1, const void* r2);
 int cmpPuntRankingsComp (const void* r1, const void* r2);
+void acumularPuntuacion (void* elem, void* punt);
 void imprimirRanking(const void* elem);
 void imprimirRankingCompleto(const void* elem);
 void imprimirJugador(const void* elem);

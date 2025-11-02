@@ -171,6 +171,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../libs/matrizDinamica/dinMtx.h" />
+		<Unit filename="../libs/string/string.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/string/string.h" />
 		<Unit filename="conexion/api.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -192,6 +196,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="entidades/entidades.h" />
+		<Unit filename="global.h" />
 		<Unit filename="inicios/inicios.c">
 			<Option compilerVar="CC" />
 		</Unit>

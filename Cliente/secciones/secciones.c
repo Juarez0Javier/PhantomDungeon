@@ -1,7 +1,29 @@
 #include "secciones.h"
 #include "../conexion/api.h"
+#include "../../libs/string/string.h"
+#include <ctype.h>
+
+bool buscarYCrearJugador (SOCKET sock, unsigned* id);
+bool _procesarNombre(tContextoGlobal* cGlobal);
+
+void impRankCompleto(void* elem, void* extra) {
+    RankingCompleto* ranking = (RankingCompleto*) elem;
+    printf("%d\t%s\t%d\n", ranking -> idJugador, ranking -> nombre, ranking -> puntTotal);
+}
+
+void prueba(void* a, int* b) {
+    printf("Hola");
+}
 
 void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador);
+
+void initInicioSesion(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+
+}
+
+void handlerInicioSesion(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+
+}
 
 void initMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
     system("cls");
@@ -12,6 +34,7 @@ void initMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesDat
 
     printf("Enter: Jugar\n");
     printf("Escape: Salir\n");
+    printf("'R': Ver rankings\n");
     printf("'C': Ver configuracion\n");
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
@@ -40,18 +63,139 @@ void handlerMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textures
             case 'c':
                 cGlobal -> seccion = SECCION_CONFIGS;
                 break;
+            case 'r':
+                cGlobal -> seccion = SECCION_RANKINGS;
+                break;
         }
     }
 
-    handleButtonsClick(
-        botonesActivos,
-        3,
-        event->button.x,
-        event->button.y,
-        &(cGlobal -> partida),
-        &(cGlobal -> seccion),
-        event
-    );
+    handleButtonsClick(botonesActivos, 3, &(cGlobal -> partida), &(cGlobal -> seccion), event);
+}
+
+void initIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    system("cls");
+
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+
+    if (cGlobal -> socket == INVALID_SOCKET) {
+        strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Inicio de sesion no disponible.");
+        GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 30, WHITE_COLOR);
+        return;
+    }
+
+    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH - tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
+    tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[0] = '\0';
+
+    strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Nombre de usuario:");
+
+    // if (buscarYCrearJugador(cGlobal -> socket, &(cGlobal -> idJugador)))
+    //     printf("ID: %d\n", cGlobal -> idJugador);
+    // else
+    //     printf("Error buscando / creando.\n");
+    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 30, WHITE_COLOR);
+
+    tex->buttons[BUT_JUGAR_GRANDE].on_click = prueba;
+    // cGlobal -> seccion = SECCION_MENU;
+
+}
+
+void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+    GHP_Button buttons[] = {tex->buttons[BUT_JUGAR_GRANDE]};
+
+    handleButtonsClick(buttons, 1, &cGlobal->partida, &cGlobal->seccion, event);
+
+    // Si se esta conectado al servidor, permite escribir en el input.
+    if (event->type == SDL_TEXTINPUT && cGlobal -> socket != INVALID_SOCKET) {
+        if (strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text)+1 < TAM_NOMBRE) {
+            strcat(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text, event->text.text);
+            GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 30, WHITE_COLOR);
+            tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text[0] = '\0';
+            GHP_updateTextTexture(renderer, tex, TEXT_ERR_NOMBRE_JUGADOR, 20, RED_COLOR);
+        }
+    } else if (event->type == SDL_KEYDOWN) {
+
+        unsigned tamNombre = strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text);
+
+        switch(event->key.keysym.sym) {
+            case SDLK_BACKSPACE:
+                if (tamNombre > 0) {
+                    tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[tamNombre-1] = '\0';
+                    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 30, WHITE_COLOR);
+                }
+                break;
+
+            case SDLK_ESCAPE:
+                cGlobal -> seccion = SECCION_MENU;
+                tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[0] = '\0';
+                GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 30, WHITE_COLOR);
+                break;
+
+            case SDLK_RETURN:
+                if (cGlobal -> socket != INVALID_SOCKET) {
+
+                    if (strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text) == 0) {
+                        strcpy(tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text, "Se debe ingresar un nombre.");
+                        GHP_updateTextTexture(renderer, tex, TEXT_ERR_NOMBRE_JUGADOR, 20, RED_COLOR);
+                        return;
+                    }
+
+                    strncpy(
+                        cGlobal -> nombreJugador,
+                        tex->texts[TEXT_ENTRADANOMBREJUGADOR].text,
+                        TAM_NOMBRE
+                    );
+
+                    cGlobal -> nombreJugador[TAM_NOMBRE] = '\0';
+                    trimStr(cGlobal -> nombreJugador);
+
+                    tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[0] = '\0';
+                    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 30, WHITE_COLOR);
+
+                    if (_procesarNombre(cGlobal)) {
+                        cGlobal -> seccion = SECCION_PARTIDA;
+                    } else {
+                        cGlobal -> socket = INVALID_SOCKET;
+                        strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Inicio de sesion no disponible.");
+                        GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 30, WHITE_COLOR);
+                    }
+
+                } else
+                    cGlobal -> seccion = SECCION_PARTIDA;
+
+                break;
+        }
+    }
+}
+
+void renderIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+
+    if (cGlobal -> socket != INVALID_SOCKET) {
+        GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREJUGADOR].tex, 52, HEIGHT * 0.4);
+        dibujarRectanguloParaEntrada(renderer);
+    }
+
+    GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREMENSAJE].tex, 52, HEIGHT * 0.3);
+    GHP_renderTexture(renderer, tex->texts[TEXT_ERR_NOMBRE_JUGADOR].tex, 52, HEIGHT * 0.55);
+    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH-tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
+}
+
+void initConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    system("cls");
+
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+
+    strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Usuario inexistente. ¿Registrar?");
+    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 40, WHITE_COLOR);
+}
+
+void handlerConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+
+}
+
+void renderConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREMENSAJE].tex, 52, 200);
+    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH-tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
 }
 
 void initJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
@@ -82,6 +226,7 @@ void initJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_T
     */
 
     mostrarMapa(&partida -> mapa);
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     GHP_renderMesh(renderer, &(tex->active_mesh), 0);
     GHP_renderButton(renderer, &tex->buttons[BUT_MENU_CHICO], WIDTH*0.21, HEIGHT*0.01);
     GHP_renderButton(renderer, &tex->buttons[BUT_PAUSA_CHICO], WIDTH*0.41, HEIGHT*0.01);
@@ -172,14 +317,7 @@ void handleJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP
         );
     }
 
-    handleButtonsClick(
-        botonesActivos,
-        3,
-        event->button.x,
-        event->button.y, partida,
-        &(cGlobal -> seccion),
-        event
-    );
+    handleButtonsClick(botonesActivos, 3, &(cGlobal -> partida), &(cGlobal -> seccion), event);
 
     if (cGlobal -> seccion != SECCION_PARTIDA) {
         vaciarCola(&partida -> movs);
@@ -260,15 +398,7 @@ void handlerDerrota(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textur
             break;
     }
 
-    handleButtonsClick(
-        botonesActivos,
-        1,
-        event->button.x,
-        event->button.y,
-        &(cGlobal -> partida),
-        &(cGlobal -> seccion),
-        event
-    );
+    handleButtonsClick(botonesActivos, 1, &(cGlobal -> partida), &(cGlobal -> seccion), event);
 }
 
 void initVictoria (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
@@ -299,15 +429,95 @@ void handlerVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textu
             break;
     }
 
-    handleButtonsClick(
-        botonesActivos,
-        1,
-        event->button.x,
-        event->button.y,
-        &(cGlobal -> partida),
-        &(cGlobal -> seccion),
-        event
-    );
+    handleButtonsClick(botonesActivos, 1, &(cGlobal -> partida), &(cGlobal -> seccion), event);
+}
+
+void initVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    int cod;
+    unsigned cantObt;
+
+    cGlobal -> salteoRankings = 0;
+
+    // Intenta obtener los rankings.
+    if (cGlobal -> socket != INVALID_SOCKET) {
+
+        system("cls");
+        printf("Rankings:\n");
+
+        cod = apiObtenerRankings(
+            cGlobal -> socket,
+            &cantObt,
+            LIMITE_RANKINGS,
+            cGlobal -> salteoRankings,
+            impRankCompleto
+        );
+
+        if (cod == OK) {
+            if (cantObt == 0) {
+                cGlobal -> salteoRankings = 0;
+                printf("\nFin. Enter: Volver al menu");
+            } else {
+                cGlobal -> salteoRankings += cantObt;
+                printf("\nEnter: Proxima pagina");
+            }
+
+        } else {
+            cGlobal -> salteoRankings = 0;
+            printf("\nError obteniendo los rankings.\n");
+        }
+
+    } else
+        printf("\nNo se puede consultar al server.\n");
+}
+
+void handlerVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+
+    int cod;
+    unsigned cantObt = 0;
+
+    if (event->type == SDL_KEYDOWN) {
+
+        if (event -> key.keysym.sym == SDLK_RETURN) {
+
+            if (cGlobal -> salteoRankings == 0) {
+                cGlobal -> seccion = SECCION_MENU;
+                return;
+            }
+
+            if (cGlobal -> socket != INVALID_SOCKET) {
+
+                system("cls");
+                printf("Rankings:\n");
+
+                cod = apiObtenerRankings(
+                    cGlobal -> socket,
+                    &cantObt,
+                    LIMITE_RANKINGS,
+                    cGlobal -> salteoRankings,
+                    impRankCompleto
+                );
+
+                if (cod == OK) {
+                    if (cantObt == 0) {
+                        cGlobal -> salteoRankings = 0;
+                        printf("\nFin. Enter: Volver al menu");
+                    } else {
+                        cGlobal -> salteoRankings += cantObt;
+                        printf("\nEnter: Proxima pagina");
+                    }
+
+                } else {
+                    cGlobal -> salteoRankings = 0;
+                    printf("\nError obteniendo los rankings.\n");
+                }
+
+            } else
+                printf("\nNo se puede consultar al server.\n");
+        }
+
+        if (event -> key.keysym.sym == SDLK_ESCAPE)
+            cGlobal -> seccion = SECCION_MENU;
+    }
 }
 
 void initVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
@@ -333,71 +543,17 @@ void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Tex
         }
     }
 
-    handleButtonsClick(
-        botonesActivos,
-        1,
-        event->button.x,
-        event->button.y,
-        &(cGlobal -> partida),
-        &(cGlobal -> seccion),
-        event
-    );
+    handleButtonsClick(botonesActivos, 1, &(cGlobal -> partida), &(cGlobal -> seccion), event);
 }
 
-void initIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
-    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
-    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH - tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
-    strcpy(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text,"\0");
-
-    strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text,"Ingrese Nombre:");
-    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 40, WHITE_COLOR);
-    //GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREJUGADOR].tex, 52, 253);
-    //GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREMENSAJE].tex, 52, 100);
-    //dibujarRectanguloParaEntrada(renderer);
-}
-
-void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
-    GHP_Button buttons[] = {tex->buttons[BUT_JUGAR_GRANDE]};
-    handleButtonsClick(buttons, 1, event->button.x, event->button.y, &cGlobal->partida, &cGlobal->seccion, event);
-
-    if (event->type == SDL_TEXTINPUT) {
-        if (strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text)+1 < MAX_LONG_NOMBRE_JUG) {
-            strcat(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text, event->text.text);
-            GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 40, WHITE_COLOR);
-        }
-    } else if (event->type == SDL_KEYDOWN && event->key.keysym.sym == SDLK_BACKSPACE) {
-        if (strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text) > 0) {
-            tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text)-1] = '\0';
-            GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 40, WHITE_COLOR);
-        }
-    }
-
-    if (event->type == SDL_KEYDOWN && event -> key.keysym.sym==SDLK_RETURN)
-        cGlobal -> seccion = SECCION_PARTIDA;
-
-    if (cGlobal->seccion != SECCION_INGRESO_NOMBRE) {
-        GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
-        strcpy(cGlobal->partida.nombreJugador, tex->texts[TEXT_ENTRADANOMBREJUGADOR].text);
-    }
-}
-
-void renderIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
-    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
-    GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREJUGADOR].tex, 52, 253);
-    GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREMENSAJE].tex, 52, 200);
-    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH-tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
-    dibujarRectanguloParaEntrada(renderer);
-}
-
-
-void handleButtonsClick(GHP_Button* botones, int cantidad, int x, int y, Partida* partida, int* seccion, SDL_Event* event) {
+void handleButtonsClick(GHP_Button* botones, int cantidad, Partida* partida, int* seccion, SDL_Event* event) {
     int i;
 
     for (i = 0; i < cantidad; i++) {
         if (
             event->type == SDL_MOUSEBUTTONDOWN &&
             event->button.button == SDL_BUTTON_LEFT &&
-            GHP_clickInButton(x, y, botones+i)
+            GHP_clickInButton(event->button.x, event->button.y, botones+i)
         ) {
             if ((botones+i)->on_click)
                 (botones+i)->on_click(partida, seccion);
@@ -408,7 +564,7 @@ void handleButtonsClick(GHP_Button* botones, int cantidad, int x, int y, Partida
 void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador) {
 
     unsigned idPartida, cMovs = 0;
-    bool err;
+    int cod;
 
     printf("Movimientos realizados:\n");
 
@@ -419,15 +575,9 @@ void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador) {
     // Una vez finaliza la partida, si puede, la guarda en el servidor.
     if (socket != INVALID_SOCKET) {
 
-        err = !apiCrearPartida(
-            socket,
-            &idPartida,
-            idJugador,
-            partida -> puntuacion,
-            cMovs
-        );
+        cod = apiCrearPartida(socket, &idPartida, idJugador, partida -> puntuacion, cMovs);
 
-        if (err)
+        if (cod != OK)
             printf("\nError al crear la partida.\n");
         else
             printf("\nID de partida: %d.\n", idPartida);
@@ -437,8 +587,89 @@ void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador) {
 }
 
 void dibujarRectanguloParaEntrada(SDL_Renderer* renderer) {
-    SDL_Rect rect = {50, 250, WIDTH-50*2, 50};
+    SDL_Rect rect = {50, HEIGHT*0.4, WIDTH-50*2, 50};
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &rect);
 }
 
+bool _procesarNombre(tContextoGlobal* cGlobal) {
+
+    int cod;
+    Jugador jug;
+
+    cod = apiBuscarJugador(cGlobal -> socket, &jug, OPCION_NOMBRE, 0, cGlobal -> nombreJugador);
+
+    if (cod == NO_ENCONTRADO) {
+
+        cod = apiCrearJugador(
+            cGlobal -> socket,
+            &(cGlobal -> idJugador),
+            cGlobal -> nombreJugador,
+            "email@gmail.com",
+            "prueba"
+        );
+    }
+
+    return cod == OK;
+}
+
+bool buscarYCrearJugador (SOCKET sock, unsigned* id) {
+
+    Jugador jugador;
+    int cod;
+    bool err = false;
+
+    char nombre[TAM_NOMBRE +1];
+    char email[TAM_EMAIL +1] = "fab@gmail.com";
+    char contrasenia[TAM_CONTRASENIA +1] = "deltarune";
+
+    char op;
+
+    // Inicializa con un valor invalido para iterar hasta tener uno valido.
+    *id = 0;
+
+    while (!err && *id == 0) {
+        printf("Ingresa tu nombre: ");
+        ingrStrNoVacio(nombre, TAM_NOMBRE, "Nombre vacio, reingresar: ");
+
+        cod = apiBuscarJugador(sock, &jugador, OPCION_NOMBRE, 0, nombre);
+
+        switch(cod) {
+            case OK:
+                imprimirJugador(&jugador);
+                *id = jugador.id;
+                break;
+            case NO_ENCONTRADO:
+                // Hacer esto por la UI.
+                printf("No existe un jugador con este nombre, deseas registrarlo? (S/N): ");
+                scanf("%c", &op);
+                fflush(stdin);
+
+                op = toupper(op);
+
+                if (op == 'S') {
+                    // Solicitar email
+                    // Solicitar contrasenia
+
+                    cod = apiCrearJugador(sock, id, nombre, email, contrasenia);
+
+                    // cod == OK
+                    // cod == ERR_FORMATO
+                    // cod == ERR_ARCHIVO
+                    // cod == ERR_CONEXION
+                    if (cod != OK) {
+                        printf("Error creando al jugador\n");
+                        err = true;
+                    }
+                } else
+                    printf("Jugador no creado\n");
+
+                break;
+            default:
+                printf("Error de formato, conexion o archivo buscando al jugador\n");
+                err = true;
+        }
+    }
+
+    return !err;
+}

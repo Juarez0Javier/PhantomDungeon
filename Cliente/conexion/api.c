@@ -4,7 +4,7 @@
 #include "../../libs/Comun/conexion.h"
 #include <stdio.h>
 
-bool apiCrearJugador(SOCKET sock, unsigned* id, const char* nombre, const char* email, const char* contrasenia) {
+int apiCrearJugador(SOCKET sock, unsigned* id, const char* nombre, const char* email, const char* contrasenia) {
 
     char peticion[TAM_BUFFER], respuesta[TAM_BUFFER];
     char *actPet = peticion, *actRes = respuesta;
@@ -19,19 +19,17 @@ bool apiCrearJugador(SOCKET sock, unsigned* id, const char* nombre, const char* 
     tamPeticion = actPet - peticion;
 
     if (!enviarPeticion(sock, tamPeticion, peticion, respuesta))
-        return false;
+        return ERR_CONEXION;
 
     leerCampo(&codRes, sizeof(codRes), &actRes);
 
-    if (codRes != OK)
-        return false;
+    if (codRes == OK)
+        leerCampo(id, sizeof(*id), &actRes);
 
-    leerCampo(id, sizeof(*id), &actRes);
-
-    return true;
+    return codRes;
 }
 
-bool apiBuscarJugador(SOCKET sock, Jugador* jug, unsigned char opcion, unsigned id, const char* nombre) {
+int apiBuscarJugador(SOCKET sock, Jugador* jug, unsigned char opcion, unsigned id, const char* nombre) {
 
     char peticion[TAM_BUFFER], respuesta[TAM_BUFFER];
     char *actPet = peticion, *actRes = respuesta;
@@ -50,19 +48,17 @@ bool apiBuscarJugador(SOCKET sock, Jugador* jug, unsigned char opcion, unsigned 
     tamPeticion = actPet - peticion;
 
     if (!enviarPeticion(sock, tamPeticion, peticion, respuesta))
-        return false;
+        return ERR_CONEXION;
 
     leerCampo(&codRes, sizeof(codRes), &actRes);
 
-    if (codRes != OK)
-        return false;
+    if (codRes == OK)
+        leerCampo(jug, sizeof(*jug), &actRes);
 
-    leerCampo(jug, sizeof(*jug), &actRes);
-
-    return true;
+    return codRes;
 }
 
-bool apiCrearPartida(SOCKET sock, unsigned* id, unsigned idJugador, unsigned puntuacion, unsigned cMovs) {
+int apiCrearPartida(SOCKET sock, unsigned* id, unsigned idJugador, unsigned puntuacion, unsigned cMovs) {
 
     char peticion[TAM_BUFFER], respuesta[TAM_BUFFER];
     char *actPet = peticion, *actRes = respuesta;
@@ -77,24 +73,22 @@ bool apiCrearPartida(SOCKET sock, unsigned* id, unsigned idJugador, unsigned pun
     tamPeticion = actPet - peticion;
 
     if (!enviarPeticion(sock, tamPeticion, peticion, respuesta))
-        return false;
+        return ERR_CONEXION;
 
     leerCampo(&codRes, sizeof(codRes), &actRes);
 
-    if (codRes != OK)
-        return false;
+    if (codRes == OK)
+        leerCampo(id, sizeof(*id), &actRes);
 
-    leerCampo(id, sizeof(*id), &actRes);
-
-    return true;
+    return codRes;
 }
 
-bool apiObtenerRankings(SOCKET sock, unsigned limite, unsigned saltear, Acc procesarRanking) {
+int apiObtenerRankings(SOCKET sock, unsigned* cantObj, unsigned limite, unsigned saltear, Acc procesarRanking) {
 
     char peticion[TAM_BUFFER], respuesta[TAM_BUFFER];
     char *actPet = peticion;
-    unsigned cantElem, tamPeticion;
-    unsigned char codPet = OBTENER_RANKINGS;
+    unsigned tamPeticion;
+    unsigned char codPet = OBTENER_RANKINGS, codRes;
     RankingCompleto rankComp;
 
     // Carga el codigo de operacion y los parametros.
@@ -103,25 +97,23 @@ bool apiObtenerRankings(SOCKET sock, unsigned limite, unsigned saltear, Acc proc
     cargarCampo(&saltear, sizeof(saltear), &actPet);
     tamPeticion = actPet - peticion;
 
-    printf("Antes de enviar peticion\n");
-
     // Si no puede enviar la peticion, sale.
     if (!enviarPeticion(sock, tamPeticion, peticion, respuesta))
-        return false;
+        return ERR_CONEXION;
 
-    printf("Despues de enviar peticion\n");
+    codRes = iniciarSecuencia(sock, respuesta, cantObj);
 
     // Si no puede iniciar la recepcion de la secuencia, sale.
-    if (!iniciarSecuencia(sock, respuesta, &cantElem))
-        return false;
+    if (codRes != INICIO_SECUENCIA)
+        return codRes;
 
-    // Si no hay registros, sale.
-    if (cantElem == 0) {
-        return true;
+    codRes = siguienteSecuencia(sock, &rankComp, sizeof(rankComp));
+
+    while (codRes == ENVIO_SECUENCIA) {
+        procesarRanking(&rankComp, NULL);
+        codRes = siguienteSecuencia(sock, &rankComp, sizeof(rankComp));
     }
 
-    while (siguienteSecuencia(sock, &rankComp, sizeof(rankComp)))
-        procesarRanking(&rankComp, NULL);
-
-    return true;
+    // Si termina con algun error, se indica.
+    return codRes == FIN_SECUENCIA ? OK : codRes;
 }

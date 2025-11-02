@@ -7,7 +7,7 @@
 #include "../../libs/Comun/comun.h"
 
 bool enviarPeticion(SOCKET sock, unsigned cantBytes, const char *peticion, char *respuesta);
-bool iniciarSecuencia(SOCKET sock, char* respuesta, unsigned *cantElem);
-bool siguienteSecuencia(SOCKET sock, void *elem, unsigned tamElem);
+int iniciarSecuencia(SOCKET sock, char* respuesta, unsigned *cantObj);
+int siguienteSecuencia(SOCKET sock, void *elem, unsigned tamElem);
 
 #endif // PROTOCOLO_H_INCLUDED

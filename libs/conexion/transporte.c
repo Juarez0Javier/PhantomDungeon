@@ -57,5 +57,6 @@ void leerCampoStr(char* campo, char** buffer) {
     memcpy(&tam, *buffer, sizeof(unsigned));
     *buffer += sizeof(unsigned);
     strncpy(campo, *buffer, tam);
+    campo[tam] = '\0'; 
     *buffer += tam;
 }

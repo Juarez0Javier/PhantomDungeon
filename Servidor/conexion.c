@@ -117,7 +117,7 @@ void iniciarServidor() {
             tamRespuesta = procesarPeticion(peticion, respuesta, &jugadores, &sec);
 
             // Si la peticion genera una secuencia de elementos a enviar, se procesan.
-            if (!listaVacia(&sec.elementos)) {
+            if (*respuesta == INICIO_SECUENCIA) {
 
                 // Envia el mensaje de inicio de secuencia + la cantidad de elementos.
                 send(socketCliente, respuesta, tamRespuesta, 0);

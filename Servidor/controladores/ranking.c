@@ -62,7 +62,7 @@ int _prepararRankings(unsigned* cantObt, tLista* rankings, tArbol* jugadores, un
             strcpy(rankComp.nombre, jugIdx.nombre);
             rankComp.puntTotal = rank.puntTotal;
 
-            cod = ponerEnListaEnOrden(rankings, &rankComp, sizeof(rankComp), cmpPuntRankingsComp, true, NULL, NULL);
+            cod = ponerEnListaAlFinal(rankings, &rankComp, sizeof(rankComp)) ? OK : SIN_MEM;
             obt++;
             fread(&rank, sizeof(rank), 1, archRankings);
         } else
@@ -75,13 +75,12 @@ int _prepararRankings(unsigned* cantObt, tLista* rankings, tArbol* jugadores, un
        descargar la misma para cargar una cola.
     */
 
-    if (cod == OK)
-        *cantObt = obt;
-    else
+    if (cod != OK) {
         vaciarLista(rankings);
-
-    mostrarLista(rankings, imprimirRankingCompleto);
-
+        *cantObt = 0;
+    } else
+        *cantObt = obt;
+        
     fclose(archRankings);
     return cod;
 }

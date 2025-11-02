@@ -65,6 +65,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../libs/conexion/transporte.h" />
+		<Unit filename="../libs/string/string.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/string/string.h" />
 		<Unit filename="conexion.c">
 			<Option compilerVar="CC" />
 		</Unit>

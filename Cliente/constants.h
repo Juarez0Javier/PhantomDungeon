@@ -10,6 +10,7 @@
 #include <time.h>
 #include <SDL.h>
 #include "../libs/Comun/comun.h"
+#include "../libs/Comun/conexion.h"
 #include "../libs/Vector/Vector.h"
 #include "../libs/Cola/Cola.h"
 #include "../libs/Lista/Lista.h"
@@ -48,19 +49,33 @@
 
 
 // Rutas
-#define RUTA_LABERINTO_PRESET "./laberintos/laberintoDefault.txt"
+// Para cuando se ejecuta de codeblocks.
+#define RUTA_LABERINTO_PRESET "./laberintos/laberinto.txt"
 #define RUTA_CONFIGS "./config.txt"
 #define RUTA_FONDO "./src/img/background.png"
-#define PATH_ASSET "./src/img/asset.png"
+#define RUTA_ASSETS "./src/img/asset.png"
+#define RUTA_BOTONES "./src/img/botones.png"
+
+// Para cuando se ejecuta del binario.
+// #define RUTA_LABERINTO_PRESET "../../laberintos/laberinto.txt"
+// #define RUTA_CONFIGS "../../config.txt"
+// #define RUTA_FONDO "../../src/img/background.png"
+// #define RUTA_ASSETS "../../src/img/asset.png"
+// #define RUTA_BOTONES "../../src/img/botones.png"
 
 // Secciones de juego
 #define SECCION_MENU 0
-#define SECCION_PARTIDA 1
-#define SECCION_DERROTA 2
-#define SECCION_VICTORIA 3
-#define SECCION_CONFIGS 4
-#define SECCION_INGRESO_NOMBRE 5
+#define SECCION_INGRESO_NOMBRE 1
+#define SECCION_CONFIRMAR_REG 2
+#define SECCION_PARTIDA 3
+#define SECCION_DERROTA 4
+#define SECCION_VICTORIA 5
+#define SECCION_RANKINGS 6
+#define SECCION_CONFIGS 7
 #define SECCION_SALIR_DIRECTO -1
+
+// Rankings
+#define LIMITE_RANKINGS 10
 
 // Texturas - General
 #define AMMOUNT_ASSETS 1
@@ -86,7 +101,11 @@
 #define AMMOUNT_BUTTONS 8
 // Texturas - Textos
 #define TEXT_ENTRADANOMBREJUGADOR 0
+#define TEXT_ERR_NOMBRE_JUGADOR 1
+
 // ranking tops quedan reservados numeros 1-20
+// rango de reserva?
+
 #define TEXT_RANKING_CABECERA 21
 #define TEXT_ENTRADANOMBREMENSAJE 22
 #define AMMOUNT_TEXTS 23
@@ -119,8 +138,7 @@
 #define DERECHA 'd'
 
 #define PORCENTAJE_CORTE_PAREDES 80
-#define TICKS_ENTRE_MOVS_FANTASMA_NORMAL 500
+#define TICKS_ENTRE_MOVS_FANTASMA_NORMAL 1000
 #define MAX_ITER_RAND 999
-#define MAX_LONG_NOMBRE_JUG 25
 
 #endif // CONSTANTS_H_INCLUDED

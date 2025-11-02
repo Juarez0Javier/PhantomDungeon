@@ -3,7 +3,6 @@
 
 #include "../constantes.h"
 
-bool validarCampoStr(const char* campo, int tam);
-
+bool validarCampoStr(const char* campo, unsigned tamMax);
 
 #endif // COMUN_H_INCLUDED

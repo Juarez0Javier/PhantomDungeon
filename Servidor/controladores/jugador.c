@@ -3,6 +3,7 @@
 #include "../../libs/conexion/modelos.h"
 #include "../../libs/conexion/transporte.h"
 #include "../peticiones.h"
+#include "../../libs/string/string.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -31,6 +32,10 @@ unsigned crearJugador(char* actPet, char* respuesta, tArbol* jugadores) {
 
     if (!validarCampoStr(contrasenia, TAM_CONTRASENIA))
         return ERR_FORMATO;
+
+    trimStr(nombre);
+    trimStr(email);
+    // No se puede recortar una contrasenia con trim.
 
     codRespuesta = _guardarJugador(&id, nombre, email, contrasenia, jugadores);
 
@@ -71,6 +76,7 @@ unsigned buscarJugador(char* actPet, char* respuesta, tArbol* jugadores) {
     } else {
 
         leerCampoStr(jugIdx.nombre, &actPet);
+        trimStr(jugIdx.nombre);
 
         if (!buscarPorNoClaveArbol(jugadores, &jugIdx, sizeof(JugadorIdx), cmpNombreJugadorIdx)) {
             codRespuesta = NO_ENCONTRADO;

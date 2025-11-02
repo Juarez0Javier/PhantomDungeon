@@ -74,19 +74,49 @@ int _guardarPartida(unsigned* id, unsigned idJugador, unsigned puntuacion, unsig
 // Actualiza el ranking, acomodando las posiciones de los jugadores.
 void _actualizarRankings(FILE* archRankings, unsigned idJugador, unsigned puntuacion) {
 
-    Ranking ranking = { idJugador, 0 };
-    int pos;
+    tLista rankings;
+    Ranking ranking;
 
-    // En caso de que por algun error no se hubiese creado el ranking junto con el jugador.
-    pos = buscarEnArchivoBin(archRankings, &ranking, sizeof(ranking), cmpJugRankings);
+    crearLista(&rankings);
 
-    ranking.puntTotal += puntuacion;
+    fread(&ranking, sizeof(ranking), 1, archRankings);
 
-    // Si existe, lo actualiza. Si no, lo aniade.
-    if (pos != -1)
-        fseek(archRankings, pos * sizeof(ranking), SEEK_SET);
-    else
-        fseek(archRankings, 0, SEEK_END);
+    /*
+     * No hay duplicados por ID en el archivo de rankings, se generan junto a los usuarios.
+       En caso de que hubiese alguno, se unifica y se acumulan las puntuaciones.
+    */
+    while (!feof(archRankings)) {
+        ponerEnListaEnOrden(
+            &rankings,
+            &ranking,
+            sizeof(ranking),
+            cmpJugRankings,
+            false,
+            acumularPuntuacion,
+            &ranking.puntTotal
+        );
+        fread(&ranking, sizeof(ranking), 1, archRankings);
+    }
 
-    fwrite(&ranking, sizeof(ranking), 1, archRankings);
+    ranking.idJugador = idJugador;
+    ranking.puntTotal = puntuacion;
+
+    // Acumula la puntuacion al usuario. Si por alguna razon no existiese el ranking del usuario, se crea.
+    ponerEnListaEnOrden(
+        &rankings,
+        &ranking,
+        sizeof(ranking),
+        cmpJugRankings,
+        false,
+        acumularPuntuacion,
+        &ranking.puntTotal
+    );
+
+    // Deja la lista ordenada por puntuacion (decreciente) nuevamente.
+    ordenarLista(&rankings, cmpPuntRankings, SELECCION);
+
+    rewind(archRankings);
+
+    while (sacarDeListaAlInicio(&rankings, &ranking, sizeof(ranking)))
+        fwrite(&ranking, sizeof(ranking), 1, archRankings);
 }

@@ -2,27 +2,27 @@
 #include "./conexion/api.h"
 #include "../libs/conexion/modelos.h"
 #include "../libs/comun/conexion.h"
+#include "./global.h"
 #include "main.h"
 #include <stdlib.h>
 #include <time.h>
-#include "./global.h"
 
 int main (int argc, char *argv[]) {
 
+    /*
+     * Una forma de acceder a ciertos parametros que son comunes a varias funciones.
+       Al ser una buena cantidad, es preferible manejarlo asi y no llenar la firma de las funciones de 10 params.
+    */
     tContextoGlobal cGlobal;
+
     GHP_TexturesData texturas;
     struct GHP_WindowData ventana;
     char* nameWindow = "PhantomDungeon";
 
     srand(time(NULL));
+    system("chcp 65001");
 
     cGlobal.socket = abrirConexion();
-
-    // Podria usarse otra flag para verificar.
-    if (cGlobal.socket == INVALID_SOCKET) {
-        printf("Error al conectarse al servidor\n");
-        cGlobal.idJugador = 0; // Se le carga un ID invalido.
-    }
 
     // Retorna true al final de la partida.
     if (GHP_SetWindow(&ventana, nameWindow, react, WIDTH, HEIGHT, &cGlobal, &texturas)) {
@@ -52,11 +52,13 @@ void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData)
     // Los elementos estan en el orden que se encuentran las opciones de seccion en el archivo de constantes.
     Seccion secciones[] = {
         {initMenu, handlerMenu, NULL},
+        {initIngresoNombre, handlerIngresoNombre, renderIngresoNombre},
+        {initConfirmarReg, handlerConfirmarReg, renderConfirmarReg},
         {initJuegoCorriendo, handleJuegoCorriendo, renderJuegoCorriendo},
         {initDerrota, handlerDerrota, NULL},
         {initVictoria, handlerVictoria, NULL},
+        {initVerRankings, handlerVerRankings, NULL},
         {initVerConfigs, handlerVerConfigs, NULL},
-        {initIngresoNombre, handlerIngresoNombre, renderIngresoNombre}
     };
 
     // Relacionadas al control de frames.

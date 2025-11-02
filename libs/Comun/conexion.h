@@ -1,9 +1,10 @@
 // Retornos (arranca en 9 para no interferir con los comunes)
-#define ERR_FORMATO 9
-#define OP_DESCONOCIDA 10
-#define INICIO_SECUENCIA 11
-#define ENVIO_SECUENCIA 12
-#define FIN_SECUENCIA 13
+#define ERR_CONEXION 9
+#define ERR_FORMATO 10
+#define OP_DESCONOCIDA 11
+#define INICIO_SECUENCIA 12
+#define ENVIO_SECUENCIA 13
+#define FIN_SECUENCIA 14
 
 // Codigos de operacion
 #define CREAR_JUGADOR 1

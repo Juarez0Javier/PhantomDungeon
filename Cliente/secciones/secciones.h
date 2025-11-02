@@ -31,8 +31,19 @@ typedef struct {
 // also the mesh updater
 // and the init, handler and render for each menu
 
+void initInicioSesion(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handlerInicioSesion(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
+
 void initMenu(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handlerMenu(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
+
+void initIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
+void renderIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+
+void initConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handlerConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
+void renderConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 
 void initJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handleJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
@@ -44,15 +55,14 @@ void handlerDerrota(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textur
 void initVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handlerVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
 
+void initVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handlerVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
+
 void initVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
 
-void initIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
-void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
-void renderIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
-
 // otros
-void handleButtonsClick(GHP_Button* buttons, int ammount, int x, int y, Partida* game, int* mode, SDL_Event* event);
+void handleButtonsClick(GHP_Button* botones, int cantidad, Partida* partida, int* seccion, SDL_Event* event);
 void dibujarRectanguloParaEntrada(SDL_Renderer* renderer);
 
 #endif // MENUS_H_INCLUDED

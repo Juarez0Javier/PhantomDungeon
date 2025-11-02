@@ -12,7 +12,6 @@ typedef struct {
     Vector fantasmas;
     tCola movs;
     tLista regMovs;
-    char nombreJugador[MAX_LONG_NOMBRE_JUG+1];
 } Partida;
 
 typedef Partida GameState; // just in case

@@ -3,11 +3,19 @@
 #include <string.h>
 
 // Valida que un campo string dado tenga el formato correcto.
-bool validarCampoStr(const char* campo, int tam) {
+bool validarCampoStr(const char* campo, unsigned tamMax) {
+
+    unsigned tam;
+
     if (!campo)
         return false;
 
-    if (strlen(campo) > tam)
+    tam = strlen(campo);
+
+    if (tam == 0)
+        return false;
+
+    if (tam > tamMax)
         return false;
 
     return true;

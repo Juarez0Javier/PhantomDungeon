@@ -6,6 +6,7 @@
 #include "./partida/partida.h"
 #include "./configs/configs.h"
 #include "../libs/graphics/graphics.h"
+#include "../libs/conexion/modelos.h"
 
 typedef struct {
     ConfigData configData;
@@ -14,6 +15,8 @@ typedef struct {
     unsigned deltaTime;
     SOCKET socket;
     unsigned idJugador;
+    char nombreJugador[TAM_NOMBRE +1];
+    unsigned salteoRankings;
 } tContextoGlobal;
 
 #endif // GLOBAL_H_INCLUDED

@@ -18,30 +18,26 @@ bool enviarPeticion(SOCKET sock, unsigned cantBytes, const char *peticion, char 
     return true;
 }
 
-bool iniciarSecuencia(SOCKET sock, char* respuesta, unsigned *cantElem) {
+int iniciarSecuencia(SOCKET sock, char* respuesta, unsigned *cantObj) {
     unsigned char cod;
     
     leerCampo(&cod, sizeof(cod), &respuesta);
 
-    if (cod != INICIO_SECUENCIA)
-        return false;
+    if (cod == INICIO_SECUENCIA)
+        leerCampo(cantObj, sizeof(*cantObj), &respuesta);
 
-    leerCampo(cantElem, sizeof(*cantElem), &respuesta);
-
-    return true;
+    return cod;
 }
 
-bool siguienteSecuencia(SOCKET sock, void *elem, unsigned tamElem) {
+int siguienteSecuencia(SOCKET sock, void *elem, unsigned tamElem) {
     unsigned char cod;
 
     // Leo si viene un elemento o fin.
     recibirExacto(sock, &cod, sizeof(cod));
 
-    if (cod == FIN_SECUENCIA)
-        return false;
-
     // Leo el elemento completo.
-    recibirExacto(sock, elem, tamElem);
+    if (cod == ENVIO_SECUENCIA)
+        recibirExacto(sock, elem, tamElem);
 
-    return true;
+    return cod;
 }

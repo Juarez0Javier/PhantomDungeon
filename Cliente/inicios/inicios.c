@@ -31,7 +31,7 @@ int iniciarTexData(GHP_TexturesData* tex_data, SDL_Renderer* renderer, Partida* 
     tex_data->buttons_loaded = 0;
     tex_data->texts_loaded = 0;
 
-    GHP_loadRectAsset(renderer, PATH_ASSET, &(tex_data->textures), AMMOUNT_TEXTURES, 40, 40, AMM_TEXT_COL_ASSET);
+    GHP_loadRectAsset(renderer, RUTA_ASSETS, &(tex_data->textures), AMMOUNT_TEXTURES, 40, 40, AMM_TEXT_COL_ASSET);
 
     if (!tex_data->textures) {
         printf("\nError loading textures.");
@@ -63,14 +63,14 @@ int iniciarTexData(GHP_TexturesData* tex_data, SDL_Renderer* renderer, Partida* 
 
 int iniciarBotones(SDL_Renderer* renderer, GHP_TexturesData* texData) {
 
-    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_MENU_CHICO], 132, 19, 248, 53, setSeccionMenu);
-    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_SALIR_CHICO], 312, 21, 428, 55, setSeccionSalir);
-    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_PAUSA_CHICO], 455, 21, 571, 55, setPausa);
-    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_JUGAR_GRANDE], 28, 85, 231, 165, setSeccionJugar);
-    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_SALIR_GRANDE], 283, 87, 486, 167, setSeccionSalir);
-    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_VERCONFIG_GRANDE], 546, 86, 749, 166, setSeccionConfigs);
-    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_MENU_GRANDE], 28, 195, 231, 275, setSeccionMenu);
-    GHP_newButtonAbs(renderer, "./src/img/botones.png", texData, &texData->buttons[BUT_JUGAR_GRANDE_A_NOMBRE], 28, 85, 231, 165, setSeccionIngresoNombre);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_MENU_CHICO], 132, 19, 248, 53, setSeccionMenu);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_SALIR_CHICO], 312, 21, 428, 55, setSeccionSalir);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_PAUSA_CHICO], 455, 21, 571, 55, setPausa);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_JUGAR_GRANDE], 28, 85, 231, 165, setSeccionJugar);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_SALIR_GRANDE], 283, 87, 486, 167, setSeccionSalir);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_VERCONFIG_GRANDE], 546, 86, 749, 166, setSeccionConfigs);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_MENU_GRANDE], 28, 195, 231, 275, setSeccionMenu);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_JUGAR_GRANDE_A_NOMBRE], 28, 85, 231, 165, setSeccionIngresoNombre);
 
     for(int i=0; i<AMMOUNT_BUTTONS; i++) {
         if (! (texData->buttons + i)->tex ) {

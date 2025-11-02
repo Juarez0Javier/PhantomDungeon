@@ -4,6 +4,12 @@
         "inicios.h": "c",
         "configs.h": "c",
         "constants.h": "c",
-        "comun.h": "c"
+        "comun.h": "c",
+        "transporte.h": "c",
+        "stdio.h": "c",
+        "string.h": "c",
+        "api.h": "c",
+        "global.h": "c",
+        "mapa.h": "c"
     }
 }

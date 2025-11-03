@@ -57,8 +57,9 @@ void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData)
         {initJuegoCorriendo, handleJuegoCorriendo, renderJuegoCorriendo},
         {initDerrota, handlerDerrota, NULL},
         {initVictoria, handlerVictoria, NULL},
-        {initVerRankings, handlerVerRankings, NULL},
+        {initVerRankings, handlerVerRankings, renderVerRankings},
         {initVerConfigs, handlerVerConfigs, NULL},
+        {initVerMovs, handlerVerMovs, NULL}
     };
 
     // Relacionadas al control de frames.

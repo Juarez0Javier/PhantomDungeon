@@ -71,6 +71,8 @@ int iniciarBotones(SDL_Renderer* renderer, GHP_TexturesData* texData) {
     GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_VERCONFIG_GRANDE], 546, 86, 749, 166, setSeccionConfigs);
     GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_MENU_GRANDE], 28, 195, 231, 275, setSeccionMenu);
     GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_JUGAR_GRANDE_A_NOMBRE], 28, 85, 231, 165, setSeccionIngresoNombre);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_VERRANKING_GRANDE], 547, 207, 750, 287, setSeccionVerRankings);
+    GHP_newButtonAbs(renderer, RUTA_BOTONES, texData, &texData->buttons[BUT_VERMOVIMIENTOS_GRANDE], 326, 207, 529, 287, setSeccionVerMovs);
 
     for(int i=0; i<AMMOUNT_BUTTONS; i++) {
         if (! (texData->buttons + i)->tex ) {
@@ -107,3 +109,5 @@ void setPausa(void* dataJuego, int* seccion) {((Partida*)dataJuego)->pausado = !
 void setSeccionJugar(void* dataJuego, int* seccion) {*seccion = SECCION_PARTIDA;}
 void setSeccionConfigs(void* dataJuego, int* seccion) {*seccion = SECCION_CONFIGS;}
 void setSeccionIngresoNombre(void* dataJuego, int* seccion) {*seccion = SECCION_INGRESO_NOMBRE;}
+void setSeccionVerRankings(void* dataJuego, int* seccion) {*seccion = SECCION_RANKINGS;}
+void setSeccionVerMovs(void* dataJuego, int* seccion) {*seccion = SECCION_VERMOVS;}

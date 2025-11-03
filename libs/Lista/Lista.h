@@ -19,6 +19,7 @@ void ordenarLista(tLista* pl, Cmp cmp, int metodo);
 int buscarEnLista(tLista* pl, const void* info, Cmp cmp);
 void vaciarLista(tLista* pl);
 void recorrerLista(const tLista* pl, Acc acc);
+void recorrerListaConInfoExtra(const tLista* pl, Acc acc, void* infoExtra);
 void reducirLista(const tLista* pl, Acc acc, void* dst);
 void mostrarLista(const tLista* pl, Imp imp);
 bool listaVacia(const tLista* pl);

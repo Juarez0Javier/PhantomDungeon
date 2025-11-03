@@ -72,10 +72,11 @@
 #define SECCION_VICTORIA 5
 #define SECCION_RANKINGS 6
 #define SECCION_CONFIGS 7
+#define SECCION_VERMOVS 8
 #define SECCION_SALIR_DIRECTO -1
 
 // Rankings
-#define LIMITE_RANKINGS 10
+#define LIMITE_RANKINGS 5
 
 // Texturas - General
 #define AMMOUNT_ASSETS 1
@@ -98,17 +99,25 @@
 #define BUT_VERCONFIG_GRANDE 5
 #define BUT_MENU_GRANDE 6
 #define BUT_JUGAR_GRANDE_A_NOMBRE 7
-#define AMMOUNT_BUTTONS 8
+#define BUT_VERRANKING_GRANDE 8
+#define BUT_VERMOVIMIENTOS_GRANDE 9
+#define AMMOUNT_BUTTONS 10
 // Texturas - Textos
-#define TEXT_ENTRADANOMBREJUGADOR 0
-#define TEXT_ERR_NOMBRE_JUGADOR 1
-
-// ranking tops quedan reservados numeros 1-20
-// rango de reserva?
-
-#define TEXT_RANKING_CABECERA 21
-#define TEXT_ENTRADANOMBREMENSAJE 22
-#define AMMOUNT_TEXTS 23
+// constantes 0-10 quedan reservadas para propositos generales
+#define TEXT_ENTRADANOMBREJUGADOR 11
+#define TEXT_ERR_NOMBRE_JUGADOR 12
+#define TEXT_RANKING_CABECERA 13
+#define TEXT_ENTRADANOMBREMENSAJE 14
+#define AMMOUNT_TEXTS 15
+// propositos generales renombrados para particulares
+#define INICIO_TEXTOS_RANKINGS 0
+#define TEXT_PRESIONEENTER LIMITE_RANKINGS
+#define INICIO_TEXTOS_CONFIGS 0
+#define CANT_CONFIGS 6
+#define INICIO_TEXTOS_MOVS 0
+#define CANT_LINEAS_MOVS 10
+#define TEXT_VIDAS 0
+#define TEXT_PUNTUACION 1
 
 // Valores de retorno
 #define NO_ESTABLECIDO -1

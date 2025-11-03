@@ -83,7 +83,7 @@ int apiCrearPartida(SOCKET sock, unsigned* id, unsigned idJugador, unsigned punt
     return codRes;
 }
 
-int apiObtenerRankings(SOCKET sock, unsigned* cantObj, unsigned limite, unsigned saltear, Acc procesarRanking) {
+int apiObtenerRankings(SOCKET sock, unsigned* cantObj, unsigned limite, unsigned saltear, Acc procesarRanking, void* extraAcc) {
 
     char peticion[TAM_BUFFER], respuesta[TAM_BUFFER];
     char *actPet = peticion;
@@ -110,7 +110,7 @@ int apiObtenerRankings(SOCKET sock, unsigned* cantObj, unsigned limite, unsigned
     codRes = siguienteSecuencia(sock, &rankComp, sizeof(rankComp));
 
     while (codRes == ENVIO_SECUENCIA) {
-        procesarRanking(&rankComp, NULL);
+        procesarRanking(&rankComp, extraAcc);
         codRes = siguienteSecuencia(sock, &rankComp, sizeof(rankComp));
     }
 

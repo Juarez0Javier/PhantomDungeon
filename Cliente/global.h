@@ -17,6 +17,7 @@ typedef struct {
     unsigned idJugador;
     char nombreJugador[TAM_NOMBRE +1];
     unsigned salteoRankings;
+    unsigned cantRankings;
 } tContextoGlobal;
 
 #endif // GLOBAL_H_INCLUDED

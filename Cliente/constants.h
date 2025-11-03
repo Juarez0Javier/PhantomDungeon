@@ -20,7 +20,7 @@
 // Configs (Algunos pares podrian consolidarse)
 #define WIDTH 800
 #define HEIGHT 500
-#define MIN_FILAS 5
+#define MIN_FILAS 8
 #define MAX_FILAS 20
 #define MIN_COLUMNAS 5
 #define MAX_COLUMNAS 20
@@ -79,7 +79,6 @@
 #define LIMITE_RANKINGS 5
 
 // Texturas - General
-#define AMMOUNT_ASSETS 1
 #define AMMOUNT_TEXTURES 8
 #define AMM_TEXT_COL_ASSET 8
 #define TEX_PARED 0
@@ -149,5 +148,6 @@
 #define PORCENTAJE_CORTE_PAREDES 80
 #define TICKS_ENTRE_MOVS_FANTASMA_NORMAL 1000
 #define MAX_ITER_RAND 999
+#define TAM_HEADER_PARTIDA 45
 
 #endif // CONSTANTS_H_INCLUDED

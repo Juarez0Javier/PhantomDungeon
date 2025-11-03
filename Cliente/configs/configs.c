@@ -37,6 +37,9 @@ bool iniciarConfig(ConfigData* configs) {
     if (camposLeidos < sizeof(camposValidos)/sizeof(campoValido))
         return false;
 
+    if (!validarConfig(configs))
+        return false;
+
     mostrarConfigs(configs);
 
     fclose(archConfigs);

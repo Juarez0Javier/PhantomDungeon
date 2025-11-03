@@ -31,7 +31,29 @@ int iniciarTexData(GHP_TexturesData* tex_data, SDL_Renderer* renderer, Partida* 
     tex_data->buttons_loaded = 0;
     tex_data->texts_loaded = 0;
 
-    GHP_loadRectAsset(renderer, RUTA_ASSETS, &(tex_data->textures), AMMOUNT_TEXTURES, 40, 40, AMM_TEXT_COL_ASSET);
+
+    int stdDimGrid[] = {11, 15, 20};
+    int stdDimPix[]  = {40, 30, 20};
+    int dimGridTex = 0, i = 0;
+    int ammount_assets = sizeof(stdDimGrid)/sizeof(int);
+
+    while (!dimGridTex && i<ammount_assets) {
+        if (partida->mapa.filas > stdDimGrid[i] || partida->mapa.cols > stdDimGrid[i]) i++;
+        else dimGridTex = stdDimGrid[i];
+    }
+    if (i >= ammount_assets) {
+        printf("\nDimension error. There is no asset matchable with the dimension chosen.");
+        return DIM_ERR;
+    }
+
+    char path[25];
+    sprintf(path, "./src/img/asset%dx%d.png", stdDimGrid[i], stdDimGrid[i]);
+    while (GHP_loadRectAsset(renderer, path, &(tex_data->textures), AMMOUNT_TEXTURES, stdDimPix[i], stdDimPix[i], AMM_TEXT_COL_ASSET) != OK && i<= ammount_assets ){
+        // at least try to render other asset
+        printf("\nFile of field %s not found, trying to use another asset.", path);
+        i++;
+        sprintf(path, "img/celds%dx%d.png", stdDimGrid[i], stdDimGrid[i]);
+    }
 
     if (!tex_data->textures) {
         printf("\nError loading textures.");
@@ -40,9 +62,9 @@ int iniciarTexData(GHP_TexturesData* tex_data, SDL_Renderer* renderer, Partida* 
     tex_data->textures_loaded = AMMOUNT_TEXTURES;
 
     // set mesh
-    int offset_to_centerX = (WIDTH - partida->mapa.cols * 40) / 2;
-    int offset_to_centerY = (HEIGHT - partida->mapa.filas * 40) / 2;
-    tex_data->active_mesh = (GHP_Mesh){offset_to_centerX, offset_to_centerY, &(tex_data->textures[0]), partida->mapa.filas, partida->mapa.cols};
+    int offset_to_centerX = (WIDTH - partida->mapa.cols * stdDimPix[i]) / 2;
+    //int offset_to_centerY = (HEIGHT - partida->mapa.filas * stdDimPix[i]) / 2;
+    tex_data->active_mesh = (GHP_Mesh){offset_to_centerX, TAM_HEADER_PARTIDA, &(tex_data->textures[0]), partida->mapa.filas, partida->mapa.cols};
 
     tex_data->buttons = malloc(sizeof(GHP_Button)*AMMOUNT_BUTTONS);
     tex_data->buttonsTexs = malloc(sizeof(GHP_Texture)*AMMOUNT_BUTTONS);

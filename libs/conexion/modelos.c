@@ -14,7 +14,7 @@ int cmpPuntRankings (const void* r1, const void* r2) {
     Ranking* rank2 = (Ranking*) r2;
 
     // Decreciente
-    return rank2 -> puntTotal - rank1 -> puntTotal; 
+    return rank2 -> puntTotal - rank1 -> puntTotal;
 }
 
 int cmpPuntRankingsComp (const void* r1, const void* r2) {
@@ -22,14 +22,14 @@ int cmpPuntRankingsComp (const void* r1, const void* r2) {
     RankingCompleto* rank2 = (RankingCompleto*) r2;
 
     // Decreciente
-    return rank2 -> puntTotal - rank1 -> puntTotal; 
+    return rank2 -> puntTotal - rank1 -> puntTotal;
 }
 
 void acumularPuntuacion (void* elem, void* punt) {
     Ranking* ranking = (Ranking*) elem;
     unsigned* p = (unsigned*) punt;
     ranking -> puntTotal += *p;
-} 
+}
 
 void imprimirRanking(const void* elem) {
     Ranking* ranking = (Ranking*) elem;
@@ -43,7 +43,7 @@ void imprimirRankingCompleto(const void* elem) {
 
 void imprimirJugador(const void* elem) {
     Jugador* jugador = (Jugador*) elem;
-    printf("%d\t%s\t%s\t%s\n", jugador -> id, jugador -> nombre, jugador -> email, jugador -> contrasenia);
+    printf("%d\t%s\n", jugador -> id, jugador -> nombre);
 }
 
 void imprimirJugadorIdx(void* elem) {

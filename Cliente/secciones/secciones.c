@@ -3,50 +3,14 @@
 #include "../../libs/string/string.h"
 #include <ctype.h>
 
-typedef struct {
-    tContextoGlobal* cGlobal;
-    GHP_TexturesData* tex;
-} tCTex;
-
-typedef struct {
-    int ult_linea;
-    int regs_en_ult_linea;
-    GHP_TexturesData* tex;
-    SDL_Renderer* renderer;
-} ctxImpReg;
-
-bool buscarYCrearJugador (SOCKET sock, unsigned* id);
+void _limpiarTextosGenerales(int ini, int fin, SDL_Renderer* renderer, GHP_TexturesData* tex);
 bool _procesarNombre(tContextoGlobal* cGlobal);
 void _cargarTexsConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void _mostrarRankCompletoSDL(void* elem, void* extra);
+void _obtenerYMostrarRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void _mostrarMovListaSDL(void* elemLista, void* infoExtra);
-
-void impRankCompleto(void* elem, void* extra) {
-    RankingCompleto* ranking = (RankingCompleto*) elem;
-    tCTex* ctx = (tCTex*) extra;
-
-    int nroReg = ctx->cGlobal->cantRankings + INICIO_TEXTOS_RANKINGS;
-
-    // Armamos la línea completa a mostrar
-    char buffer[200];
-    snprintf(buffer, sizeof(buffer), "%u  %s  %u",
-             ranking->idJugador,
-             ranking->nombre,
-             ranking->puntTotal);
-
-    // Copiamos al text correspondiente
-    strcpy(ctx->tex->texts[nroReg].text, buffer);
-
-    ctx->cGlobal->cantRankings++;
-
-    //printf("%d\n", ctx->cGlobal->salteoRankings);
-    printf("%d\t%s\t%d\n", ranking->idJugador, ranking->nombre, ranking->puntTotal);
-}
-
-void prueba(void* a, int* b) {
-    printf("Hola");
-}
-
 void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador);
+void _mostrarFinPartida(const char* msj, Partida* partida, SDL_Renderer* renderer, GHP_TexturesData* tex);
 
 void initMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
     system("cls");
@@ -73,7 +37,8 @@ void handlerMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textures
     GHP_Button botonesActivos[] = {
         tex->buttons[BUT_JUGAR_GRANDE_A_NOMBRE],
         tex->buttons[BUT_SALIR_GRANDE],
-        tex->buttons[BUT_VERCONFIG_GRANDE]
+        tex->buttons[BUT_VERCONFIG_GRANDE],
+        tex->buttons[BUT_VERRANKING_GRANDE],
     };
 
     if (event->type == SDL_KEYDOWN) {
@@ -93,7 +58,7 @@ void handlerMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textures
         }
     }
 
-    handleButtonsClick(botonesActivos, 3, &(cGlobal -> partida), &(cGlobal -> seccion), event);
+    handleButtonsClick(botonesActivos, 4, &(cGlobal -> partida), &(cGlobal -> seccion), event);
 }
 
 void initIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
@@ -102,126 +67,150 @@ void initIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Tex
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
 
     if (cGlobal -> socket == INVALID_SOCKET) {
-        strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Inicio de sesion no disponible.");
-        GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 30, BLACK_COLOR);
+        strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Inicio de sesion y guardado de partidas no disponible.");
+        GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, TAM_FUENTE_CHICO, RED_COLOR);
         return;
     }
 
-    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH - tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
-    tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[0] = '\0';
-
     strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Nombre de usuario:");
+    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, TAM_FUENTE_CHICO, BLACK_COLOR);
 
-    // if (buscarYCrearJugador(cGlobal -> socket, &(cGlobal -> idJugador)))
-    //     printf("ID: %d\n", cGlobal -> idJugador);
-    // else
-    //     printf("Error buscando / creando.\n");
-    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 30, BLACK_COLOR);
+    // Limpia el texto del input y del error antes de empezar.
+    tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[0] = '\0';
+    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 0, BLACK_COLOR);
+    tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text[0] = '\0';
+    GHP_updateTextTexture(renderer, tex, TEXT_ERR_NOMBRE_JUGADOR, 0, RED_COLOR);
 
-    tex->buttons[BUT_JUGAR_GRANDE].on_click = prueba;
-    // cGlobal -> seccion = SECCION_MENU;
-
+    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH - tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
 }
 
 void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
     GHP_Button buttons[] = {tex->buttons[BUT_JUGAR_GRANDE]};
+    unsigned tamNombre;
 
-    handleButtonsClick(buttons, 1, &cGlobal->partida, &cGlobal->seccion, event);
+    // Si no hay conexion, se informa y se la opcion de jugar.
+    if (cGlobal -> socket == INVALID_SOCKET) {
 
-    // Si se esta conectado al servidor, permite escribir en el input.
-    if (event->type == SDL_TEXTINPUT && cGlobal -> socket != INVALID_SOCKET) {
-        if (strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text)+1 < TAM_NOMBRE) {
-            strcat(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text, event->text.text);
-            GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 30, BLACK_COLOR);
-            tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text[0] = '\0';
-            GHP_updateTextTexture(renderer, tex, TEXT_ERR_NOMBRE_JUGADOR, 20, RED_COLOR);
+        handleButtonsClick(buttons, 1, &cGlobal->partida, &cGlobal->seccion, event);
+
+        if (event->type == SDL_KEYDOWN) {
+
+            switch(event->key.keysym.sym) {
+
+                case SDLK_ESCAPE:
+                    cGlobal -> seccion = SECCION_MENU;
+                    break;
+
+                case SDLK_RETURN:
+                    cGlobal -> seccion = SECCION_PARTIDA;
+                    break;
+            }
         }
-    } else if (event->type == SDL_KEYDOWN) {
 
-        unsigned tamNombre = strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text);
+        return;
+    }
+
+    tamNombre = strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text);
+
+    if (validarStrNoVacio(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text, tamNombre))
+        handleButtonsClick(buttons, 1, &cGlobal->partida, &cGlobal->seccion, event);
+
+    if (event->type == SDL_TEXTINPUT) {
+
+        // Si no se excede el limite de tamanio del texto, lo escribe en el input.
+        if (tamNombre <= TAM_NOMBRE) {
+            strcat(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text, event->text.text);
+            GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, TAM_FUENTE_CHICO, BLACK_COLOR);
+            tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text[0] = '\0';
+            GHP_updateTextTexture(renderer, tex, TEXT_ERR_NOMBRE_JUGADOR, TAM_FUENTE_CHICO, RED_COLOR);
+        }
+
+    } else if (event->type == SDL_KEYDOWN) {
 
         switch(event->key.keysym.sym) {
             case SDLK_BACKSPACE:
+
+                // Va borrando caracter a caracter.
                 if (tamNombre > 0) {
                     tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[tamNombre-1] = '\0';
-                    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 30, BLACK_COLOR);
+                    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, TAM_FUENTE_CHICO, BLACK_COLOR);
                 }
                 break;
 
             case SDLK_ESCAPE:
                 cGlobal -> seccion = SECCION_MENU;
                 tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[0] = '\0';
-                GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 30, BLACK_COLOR);
+                GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, TAM_FUENTE_CHICO, BLACK_COLOR);
                 break;
 
             case SDLK_RETURN:
-                if (cGlobal -> socket != INVALID_SOCKET) {
-
-                    if (strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text) == 0) {
-                        strcpy(tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text, "Se debe ingresar un nombre.");
-                        GHP_updateTextTexture(renderer, tex, TEXT_ERR_NOMBRE_JUGADOR, 20, RED_COLOR);
-                        return;
-                    }
-
-                    strncpy(
-                        cGlobal -> nombreJugador,
-                        tex->texts[TEXT_ENTRADANOMBREJUGADOR].text,
-                        TAM_NOMBRE
-                    );
-
-                    cGlobal -> nombreJugador[TAM_NOMBRE] = '\0';
-                    trimStr(cGlobal -> nombreJugador);
-
-                    tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[0] = '\0';
-                    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 30, BLACK_COLOR);
-
-                    printf("Nombre jugador: %s", cGlobal -> nombreJugador);
-
-                    if (_procesarNombre(cGlobal)) {
-                        cGlobal -> seccion = SECCION_PARTIDA;
-                    } else {
-                        cGlobal -> socket = INVALID_SOCKET;
-                        strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Inicio de sesion no disponible.");
-                        GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 30, BLACK_COLOR);
-                    }
-
-                } else
-                    cGlobal -> seccion = SECCION_PARTIDA;
-
+                cGlobal -> seccion = SECCION_PARTIDA;
                 break;
         }
+    }
+
+    if (cGlobal -> seccion == SECCION_PARTIDA) {
+
+        // Si se ingresa un nombre vacio, se informa el error y se queda en la seccion de ingreso de nombre.
+        if (!validarStrNoVacio(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text, tamNombre)) {
+            strcpy(tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text, "Se debe ingresar un nombre.");
+            GHP_updateTextTexture(renderer, tex, TEXT_ERR_NOMBRE_JUGADOR, TAM_FUENTE_CHICO, RED_COLOR);
+            cGlobal -> seccion = SECCION_INGRESO_NOMBRE;
+            return;
+        }
+
+        strncpy(
+            cGlobal -> nombreJugador,
+            tex->texts[TEXT_ENTRADANOMBREJUGADOR].text,
+            TAM_NOMBRE
+        );
+
+        cGlobal -> nombreJugador[TAM_NOMBRE] = '\0';
+        trimStr(cGlobal -> nombreJugador);
+
+        // Si falla en encontrar o crear el nombre, se queda en la seccion de ingreso de nombre e informa el error.
+        if (!_procesarNombre(cGlobal)) {
+            cGlobal -> socket = INVALID_SOCKET;
+            strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Inicio de sesion y guardado de partidas no disponible.");
+            GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, TAM_FUENTE_CHICO, RED_COLOR);
+            cGlobal -> seccion = SECCION_INGRESO_NOMBRE;
+            return;
+        }
+    }
+
+    // Limpia el texto del input y del error al terminar.
+    if (cGlobal -> seccion != SECCION_INGRESO_NOMBRE) {
+        tex->texts[TEXT_ENTRADANOMBREJUGADOR].text[0] = '\0';
+        GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, 0, BLACK_COLOR);
+        tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text[0] = '\0';
+        GHP_updateTextTexture(renderer, tex, TEXT_ERR_NOMBRE_JUGADOR, 0, RED_COLOR);
     }
 }
 
 void renderIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+    unsigned tamNombre = strlen(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text);
 
     if (cGlobal -> socket != INVALID_SOCKET) {
         GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREJUGADOR].tex, 52, HEIGHT * 0.4);
         dibujarRectanguloParaEntrada(renderer);
     }
 
+    // Solo si se ingresa un nombre valido, o no hay conexion, muestra el boton para jugar.
+    if (
+        validarStrNoVacio(tex->texts[TEXT_ENTRADANOMBREJUGADOR].text, tamNombre) ||
+        cGlobal -> socket == INVALID_SOCKET
+    ) {
+        GHP_renderButton(
+            renderer,
+            &tex->buttons[BUT_JUGAR_GRANDE],
+            (WIDTH-tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2,
+            HEIGHT*0.7
+        );
+    }
+
     GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREMENSAJE].tex, 52, HEIGHT * 0.3);
     GHP_renderTexture(renderer, tex->texts[TEXT_ERR_NOMBRE_JUGADOR].tex, 52, HEIGHT * 0.55);
-    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH-tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
-}
-
-void initConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
-    system("cls");
-
-    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
-
-    strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Usuario inexistente. ¿Registrar?");
-    GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, 40, BLACK_COLOR);
-}
-
-void handlerConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
-
-}
-
-void renderConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
-    GHP_renderTexture(renderer, tex->texts[TEXT_ENTRADANOMBREMENSAJE].tex, 52, 200);
-    GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE], (WIDTH-tex->buttons[BUT_JUGAR_GRANDE].tex->width)/2, HEIGHT*0.7);
 }
 
 void initJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
@@ -238,19 +227,6 @@ void initJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_T
     if (generarMapaRandom(&(cGlobal -> configData), &cGlobal->partida, RUTA_LABERINTO_PRESET) != OK)
         printf("Error genrando el mapa random.\n");
 
-    /*
-    // Le podriamos pasar el nombre del archivo de laberinto por argumentos a main.
-    // Una vez tengamos el algoritmo generador, reemplazarlo ac�.
-    //if (!cargarMapaDeArchivo(&partida -> mapa, &partida -> jugador, &partida -> fantasmas, RUTA_LABERINTO_PRESET))
-    if (cargarMapaDeArchivoNoSeguro(&partida -> mapa, &partida -> jugador, &partida -> fantasmas, RUTA_LABERINTO_PRESET) != OK) {
-        printf("Error cargando el mapa del archivo.\n");
-        cGlobal->seccion = SECCION_MENU;
-    } else {
-        mostrarMapa(&partida -> mapa);
-        GHP_renderMesh(renderer, &(tex->active_mesh), 0);
-    }
-    */
-
     mostrarMapa(&partida -> mapa);
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     GHP_renderMesh(renderer, &(tex->active_mesh), 0);
@@ -265,7 +241,6 @@ void handleJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP
     GHP_Button botonesActivos[] = {
         tex->buttons[BUT_MENU_CHICO],
         tex->buttons[BUT_PAUSA_CHICO],
-        tex->buttons[BUT_SALIR_CHICO]
     };
 
     if (event -> type == SDL_KEYDOWN) {
@@ -343,7 +318,7 @@ void handleJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP
         );
     }
 
-    handleButtonsClick(botonesActivos, 3, &(cGlobal -> partida), &(cGlobal -> seccion), event);
+    handleButtonsClick(botonesActivos, 2, &(cGlobal -> partida), &(cGlobal -> seccion), event);
 
     if (cGlobal -> seccion != SECCION_PARTIDA) {
         vaciarCola(&partida -> movs);
@@ -387,12 +362,11 @@ void renderJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP
 
         GHP_renderButton(renderer, &tex->buttons[BUT_PAUSA_CHICO], WIDTH*0.41, HEIGHT*0.01);
         GHP_renderButton(renderer, &tex->buttons[BUT_MENU_CHICO], WIDTH*0.21, HEIGHT*0.01);
-        GHP_renderButton(renderer, &tex->buttons[BUT_SALIR_CHICO], WIDTH*0.61, HEIGHT*0.01);
 
         sprintf(tex->texts[TEXT_VIDAS].text, "Vidas: %d", cGlobal->partida.vidasRestantes);
         sprintf(tex->texts[TEXT_PUNTUACION].text, "Puntuacion: %d", cGlobal->partida.puntuacion);
-        GHP_renderText(renderer, tex, TEXT_VIDAS, 20, WHITE_COLOR, 5, 5);
-        GHP_renderText(renderer, tex, TEXT_PUNTUACION, 20, WHITE_COLOR, 610, 5);
+        GHP_renderText(renderer, tex, TEXT_VIDAS, TAM_FUENTE_CHICO, BLACK_COLOR, 5, 5);
+        GHP_renderText(renderer, tex, TEXT_PUNTUACION, TAM_FUENTE_CHICO, BLACK_COLOR, 610, 5);
 
     } else {
         // agrisando el boton de pausa y el tablero
@@ -413,11 +387,7 @@ void initDerrota (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textures
     printf("=======================\n\n");
 
     _procesarFinPartida(&(cGlobal -> partida), cGlobal -> socket, cGlobal -> idJugador);
-
-    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
-    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
-    GHP_renderButton(renderer, &tex->buttons[BUT_VERMOVIMIENTOS_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.4);
-    // Mostrar registro de movmientos.
+    _mostrarFinPartida("Fin del juego.", &(cGlobal -> partida), renderer, tex);
 }
 
 void handlerDerrota(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
@@ -448,11 +418,7 @@ void initVictoria (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Texture
     printf("=======================\n\n");
 
     _procesarFinPartida(&(cGlobal -> partida), cGlobal -> socket, cGlobal -> idJugador);
-
-    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
-    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
-    GHP_renderButton(renderer, &tex->buttons[BUT_VERMOVIMIENTOS_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.4);
-    // Mostrar registro de movmientos.
+    _mostrarFinPartida("Nivel superado!", &(cGlobal -> partida), renderer, tex);
 }
 
 void handlerVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
@@ -474,133 +440,43 @@ void handlerVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textu
 }
 
 void initVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
-    int cod;
-    unsigned cantObt;
-    tCTex ctx = { cGlobal, tex };
 
     cGlobal -> cantRankings = 0;
     cGlobal -> salteoRankings = 0;
 
-    // Intenta obtener los rankings.
-    if (cGlobal -> socket != INVALID_SOCKET) {
-
-        system("cls");
-        printf("Rankings:\n");
-
-        cod = apiObtenerRankings(
-            cGlobal -> socket,
-            &cantObt,
-            LIMITE_RANKINGS,
-            cGlobal -> salteoRankings,
-            impRankCompleto,
-            &ctx
-        );
-
-        if (cod == OK) {
-            if (cantObt == 0) {
-                cGlobal -> salteoRankings = 0;
-                printf("\nFin. Enter: Volver al menu");
-            } else {
-                cGlobal -> salteoRankings += cantObt;
-                printf("\nEnter: Proxima pagina");
-            }
-
-            cGlobal->cantRankings = 0;
-
-        } else {
-            cGlobal -> salteoRankings = 0;
-            printf("\nError obteniendo los rankings.\n");
-        }
-
-    } else
-        printf("\nNo se puede consultar al server.\n");
-
-    for (int i = INICIO_TEXTOS_RANKINGS; i < LIMITE_RANKINGS + INICIO_TEXTOS_RANKINGS; i++) {
-        GHP_updateTextTexture(renderer, tex, i, 30, BLACK_COLOR); // actualizar cada texture correctamente
-    }
-
-    strcpy(tex->texts[TEXT_PRESIONEENTER].text,"[Presione enter para ver siguiente pagina]");
-    GHP_updateTextTexture(renderer, tex, TEXT_PRESIONEENTER, 30, WHITE_COLOR);
+    _obtenerYMostrarRankings(cGlobal, renderer, tex);
 }
 
 void handlerVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
-
-    int cod;
-    unsigned cantObt = 0;
-    tCTex ctx = { cGlobal, tex };
 
     if (event->type == SDL_KEYDOWN) {
 
         if (event -> key.keysym.sym == SDLK_RETURN) {
 
-            if (cGlobal -> salteoRankings == 0) {
+            // Si ya no hay rankings para saltear, termina el salteo.
+            if (cGlobal -> salteoRankings > 0)
+                _obtenerYMostrarRankings(cGlobal, renderer, tex);
+            else
                 cGlobal -> seccion = SECCION_MENU;
-                return;
-            }
-
-            for (int i = INICIO_TEXTOS_RANKINGS; i < LIMITE_RANKINGS + INICIO_TEXTOS_RANKINGS; i++) {
-                tex->texts[i].text[0] = '\0';
-            }
-
-            if (cGlobal -> socket != INVALID_SOCKET) {
-
-                system("cls");
-                printf("Rankings:\n");
-
-                cod = apiObtenerRankings(
-                    cGlobal -> socket,
-                    &cantObt,
-                    LIMITE_RANKINGS,
-                    cGlobal -> salteoRankings,
-                    impRankCompleto,
-                    &ctx
-                );
-
-                if (cod == OK) {
-                    if (cantObt == 0) {
-                        cGlobal -> salteoRankings = 0;
-
-                        int idx = INICIO_TEXTOS_RANKINGS + cGlobal->cantRankings;
-                        strcpy(tex->texts[idx].text, "Fin del ranking");
-                        GHP_updateTextTexture(renderer, tex, idx, 30, BLACK_COLOR);
-
-                        printf("\nFin. Enter: Volver al menu");
-                    } else {
-                        cGlobal -> salteoRankings += cantObt;
-                        printf("\nEnter: Proxima pagina");
-                    }
-
-                    cGlobal->cantRankings = 0;
-
-                    for (int i = INICIO_TEXTOS_RANKINGS; i < LIMITE_RANKINGS + INICIO_TEXTOS_RANKINGS; i++) {
-                        GHP_updateTextTexture(renderer, tex, i, 30, BLACK_COLOR); // actualizar cada texture correctamente
-                    }
-
-                } else {
-                    cGlobal -> salteoRankings = 0;
-                    printf("\nError obteniendo los rankings.\n");
-                }
-
-            } else
-                printf("\nNo se puede consultar al server.\n");
         }
 
         if (event -> key.keysym.sym == SDLK_ESCAPE)
             cGlobal -> seccion = SECCION_MENU;
+
+        // Cuando cambia de seccion, limpia los textos.
+        if (cGlobal -> seccion != SECCION_RANKINGS) {
+            _limpiarTextosGenerales(INICIO_TEXTOS_RANKINGS, LIMITE_RANKINGS, renderer, tex);
+            tex->texts[TEXT_PRESIONEENTER].text[0] = '\0';
+            GHP_updateTextTexture(renderer, tex, TEXT_PRESIONEENTER, 0, BLACK_COLOR);
+        }
     }
 }
 
 void renderVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
 
-    for (int i = INICIO_TEXTOS_RANKINGS; i < LIMITE_RANKINGS + INICIO_TEXTOS_RANKINGS; i++) {
-        GHP_renderTexture(renderer, tex->texts[i].tex, 52, HEIGHT * (i - INICIO_TEXTOS_RANKINGS) * 0.1 + 52);
-    }
-
-    if (strcmp(tex->texts[INICIO_TEXTOS_RANKINGS].text, "Fin del ranking") == 0) {
-        strcpy(tex->texts[TEXT_PRESIONEENTER].text,"[Presione enter para volver al menu]");
-        GHP_updateTextTexture(renderer, tex, TEXT_PRESIONEENTER, 30, WHITE_COLOR);
-    }
+    for (int i = INICIO_TEXTOS_RANKINGS; i < LIMITE_RANKINGS; i++)
+        GHP_renderTexture(renderer, tex->texts[i].tex, 52, HEIGHT * i * 0.1 + 52);
 
     GHP_renderTexture(renderer, tex->texts[TEXT_PRESIONEENTER].tex, 52, HEIGHT - 75);
 }
@@ -615,9 +491,8 @@ void initVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textur
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.8);
 
-    for (int i=0; i<CANT_CONFIGS; i++) {
+    for (int i = 0; i < CANT_CONFIGS; i++)
         GHP_renderTexture(renderer, tex->texts[i].tex, 52, HEIGHT * (i - INICIO_TEXTOS_CONFIGS) * 0.1 + 20);
-    }
 }
 
 void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
@@ -635,19 +510,12 @@ void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Tex
     }
 
     handleButtonsClick(botonesActivos, 1, &(cGlobal -> partida), &(cGlobal -> seccion), event);
-}
 
-void handleButtonsClick(GHP_Button* botones, int cantidad, Partida* partida, int* seccion, SDL_Event* event) {
-    int i;
-
-    for (i = 0; i < cantidad; i++) {
-        if (
-            event->type == SDL_MOUSEBUTTONDOWN &&
-            event->button.button == SDL_BUTTON_LEFT &&
-            GHP_clickInButton(event->button.x, event->button.y, botones+i)
-        ) {
-            if ((botones+i)->on_click)
-                (botones+i)->on_click(partida, seccion);
+    // Cuando sale de la seccion, limpia los textos.
+    if (cGlobal -> seccion != SECCION_CONFIGS) {
+        for (int i = 0; i < CANT_CONFIGS; i++) {
+            tex->texts[i].text[0] = '\0';
+            GHP_updateTextTexture(renderer, tex, i, TAM_FUENTE_GRANDE, BLACK_COLOR);
         }
     }
 }
@@ -655,7 +523,7 @@ void handleButtonsClick(GHP_Button* botones, int cantidad, Partida* partida, int
 void initVerMovs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
     ctxImpReg lineasImpresas = {0,0, tex, renderer};
 
-    for (int i=0; i<CANT_LINEAS_MOVS; i++)
+    for (int i= 0; i < CANT_LINEAS_MOVS; i++)
         tex->texts[i-INICIO_TEXTOS_MOVS].text[0] = '\0';
 
     recorrerListaConInfoExtra(&cGlobal->partida.regMovs, _mostrarMovListaSDL, &lineasImpresas);
@@ -681,8 +549,44 @@ void handlerVerMovs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textur
 
     handleButtonsClick(botonesActivos, 1, &(cGlobal -> partida), &(cGlobal -> seccion), event);
 
-    if (cGlobal->seccion != SECCION_VERMOVS)
+    // Cuando sale de la seccion, limpia los textos y vacia la lista.
+    if (cGlobal->seccion != SECCION_VERMOVS) {
+        _limpiarTextosGenerales(INICIO_TEXTOS_MOVS, CANT_LINEAS_MOVS, renderer, tex);
         vaciarLista(&cGlobal->partida.regMovs);
+    }
+
+}
+
+void handleButtonsClick(GHP_Button* botones, int cantidad, Partida* partida, int* seccion, SDL_Event* event) {
+    int i;
+
+    for (i = 0; i < cantidad; i++) {
+        if (
+            event->type == SDL_MOUSEBUTTONDOWN &&
+            event->button.button == SDL_BUTTON_LEFT &&
+            GHP_clickInButton(event->button.x, event->button.y, botones+i)
+        ) {
+            if ((botones+i)->on_click)
+                (botones+i)->on_click(partida, seccion);
+        }
+    }
+}
+
+void dibujarRectanguloParaEntrada(SDL_Renderer* renderer) {
+    SDL_Rect rect = {50, HEIGHT*0.4, WIDTH-50*2, 50};
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawRect(renderer, &rect);
+}
+
+
+
+void _limpiarTextosGenerales(int ini, int fin, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    int i;
+
+    for (i = ini; i < fin; i++) {
+        tex->texts[i].text[0] = '\0';
+        GHP_updateTextTexture(renderer, tex, i, 0, BLACK_COLOR);
+    }
 }
 
 void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador) {
@@ -711,10 +615,27 @@ void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador) {
         printf("\nNo se puede enviar al server.\n");
 }
 
-void dibujarRectanguloParaEntrada(SDL_Renderer* renderer) {
-    SDL_Rect rect = {50, HEIGHT*0.4, WIDTH-50*2, 50};
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderDrawRect(renderer, &rect);
+void _mostrarFinPartida(const char* msj, Partida* partida, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+
+    strcpy(tex->texts[TEXT_CABECERA_O_TITULO].text, msj);
+    GHP_updateTextTexture(renderer, tex, TEXT_CABECERA_O_TITULO, TAM_FUENTE_GRANDE, BLACK_COLOR);
+
+    sprintf(tex->texts[TEXT_PUNTUACION].text, "Puntuacion: %d", partida -> puntuacion);
+    sprintf(tex->texts[TEXT_PREMIOS].text, "Premios: %d", partida -> premiosObt);
+    sprintf(tex->texts[TEXT_VIDAS].text, "Vidas: %d", partida -> vidasRestantes);
+
+    GHP_renderTexture(renderer, tex->texts[TEXT_CABECERA_O_TITULO].tex, WIDTH*0.35, HEIGHT*0.2);
+
+    GHP_renderText(renderer, tex, TEXT_PUNTUACION, TAM_FUENTE_CHICO, BLACK_COLOR, WIDTH*0.35, HEIGHT*0.3);
+    GHP_renderText(renderer, tex, TEXT_PREMIOS, TAM_FUENTE_CHICO, BLACK_COLOR, WIDTH*0.35, HEIGHT*0.35);
+    GHP_renderText(renderer, tex, TEXT_VIDAS, TAM_FUENTE_CHICO, BLACK_COLOR, WIDTH*0.35, HEIGHT*0.4);
+
+    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.55);
+    GHP_renderButton(renderer, &tex->buttons[BUT_VERMOVIMIENTOS_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.75);
+
+    // Limpia los textos usados por la partida.
+    _limpiarTextosGenerales(INICIO_TEXTOS_PARTIDAS, CANT_TEXTOS_PARTIDAS, renderer, tex);
 }
 
 bool _procesarNombre(tContextoGlobal* cGlobal) {
@@ -729,9 +650,7 @@ bool _procesarNombre(tContextoGlobal* cGlobal) {
         cod = apiCrearJugador(
             cGlobal -> socket,
             &(cGlobal -> idJugador),
-            cGlobal -> nombreJugador,
-            "email@gmail.com",
-            "prueba"
+            cGlobal -> nombreJugador
         );
     } else
         cGlobal -> idJugador = jug.id;
@@ -739,74 +658,108 @@ bool _procesarNombre(tContextoGlobal* cGlobal) {
     return cod == OK;
 }
 
-bool buscarYCrearJugador (SOCKET sock, unsigned* id) {
+void _cargarTexsConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    char configsNombres[][TAM_MAX_NOMBRE_CONFIG] = {
+        "filas",
+        "columnas",
+        "vidas_inicio",
+        "maximo_numero_fantasmas",
+        "maximo_numero_premios",
+        "maximo_vidas_extra"
+    };
 
-    Jugador jugador;
-    int cod;
-    bool err = false;
+    float* configsValores[] = {
+        &cGlobal->configData.filas,
+        &cGlobal->configData.columnas,
+        &cGlobal->configData.vidas_inicio,
+        &cGlobal->configData.maximo_numero_fantasmas,
+        &cGlobal->configData.maximo_numero_premios,
+        &cGlobal->configData.maximo_vidas_extra
+    };
 
-    char nombre[TAM_NOMBRE +1];
-    char email[TAM_EMAIL +1] = "fab@gmail.com";
-    char contrasenia[TAM_CONTRASENIA +1] = "deltarune";
-
-    char op;
-
-    // Inicializa con un valor invalido para iterar hasta tener uno valido.
-    *id = 0;
-
-    while (!err && *id == 0) {
-        printf("Ingresa tu nombre: ");
-        ingrStrNoVacio(nombre, TAM_NOMBRE, "Nombre vacio, reingresar: ");
-
-        cod = apiBuscarJugador(sock, &jugador, OPCION_NOMBRE, 0, nombre);
-
-        switch(cod) {
-            case OK:
-                imprimirJugador(&jugador);
-                *id = jugador.id;
-                break;
-            case NO_ENCONTRADO:
-                // Hacer esto por la UI.
-                printf("No existe un jugador con este nombre, deseas registrarlo? (S/N): ");
-                scanf("%c", &op);
-                fflush(stdin);
-
-                op = toupper(op);
-
-                if (op == 'S') {
-                    // Solicitar email
-                    // Solicitar contrasenia
-
-                    cod = apiCrearJugador(sock, id, nombre, email, contrasenia);
-
-                    // cod == OK
-                    // cod == ERR_FORMATO
-                    // cod == ERR_ARCHIVO
-                    // cod == ERR_CONEXION
-                    if (cod != OK) {
-                        printf("Error creando al jugador\n");
-                        err = true;
-                    }
-                } else
-                    printf("Jugador no creado\n");
-
-                break;
-            default:
-                printf("Error de formato, conexion o archivo buscando al jugador\n");
-                err = true;
-        }
+    for (int i = INICIO_TEXTOS_CONFIGS; i < CANT_CONFIGS; i++) {
+        sprintf(tex->texts[i].text, "%s: %.0f", configsNombres[i], *(configsValores[i]));
+        GHP_updateTextTexture(renderer, tex, i, TAM_FUENTE_GRANDE, BLACK_COLOR);
     }
-
-    return !err;
 }
 
-void _cargarTexsConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
-    char configsNombres[CANT_CONFIGS][100] = {"filas", "columnas", "vidas_inicio", "maximo_numero_fantasmas", "maximo_numero_premios", "maximo_vidas_extra"};
-    float* configsValores[] = {&cGlobal->configData.filas, &cGlobal->configData.columnas, &cGlobal->configData.vidas_inicio,
-        &cGlobal->configData.maximo_numero_fantasmas, &cGlobal->configData.maximo_numero_premios, &cGlobal->configData.maximo_vidas_extra};
-    for (int i=0; i<CANT_CONFIGS; i++) {
-        sprintf(tex->texts[i - INICIO_TEXTOS_CONFIGS].text, "%s: %.0f", configsNombres[i], *(configsValores[i]));
-        GHP_updateTextTexture(renderer, tex, i, 30, BLACK_COLOR);
+void _mostrarRankCompletoSDL(void* elem, void* extra) {
+    RankingCompleto* ranking = (RankingCompleto*) elem;
+    tCTex* ctx = (tCTex*) extra;
+
+    int nroReg = ctx->cGlobal->cantRankings + INICIO_TEXTOS_RANKINGS;
+
+    snprintf(
+        ctx->tex->texts[nroReg].text,
+        TAM_NOMBRE + 2*TAM_MAX_UINT_A_STR +4 +1, // El +4 es por los espacios.
+        "%u  %s  %u",
+        ranking->idJugador,
+        ranking->nombre,
+        ranking->puntTotal
+    );
+
+    ctx->cGlobal->cantRankings++;
+
+    printf("%d\t%s\t%d\n", ranking->idJugador, ranking->nombre, ranking->puntTotal);
+}
+
+void _obtenerYMostrarRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+
+    int cod;
+    unsigned cantObt;
+    tCTex ctx = { cGlobal, tex };
+
+    // Si no pudo conectarse o se corto la conexion, informa el error.
+    if (cGlobal -> socket == INVALID_SOCKET) {
+        strcpy(tex->texts[INICIO_TEXTOS_RANKINGS].text, "Rankings no disponibles.");
+        GHP_updateTextTexture(renderer, tex, INICIO_TEXTOS_RANKINGS, TAM_FUENTE_GRANDE, RED_COLOR);
+        strcpy(tex->texts[TEXT_PRESIONEENTER].text, "[Presione enter para volver al menu]");
+        GHP_updateTextTexture(renderer, tex, TEXT_PRESIONEENTER, TAM_FUENTE_GRANDE, BLACK_COLOR);
+        printf("\nRankings no disponibles.\n");
+        return;
+    }
+
+    system("cls");
+    printf("Rankings:\n");
+
+    // Antes de obtener y mostrar resultados, limpia los textos.
+    _limpiarTextosGenerales(INICIO_TEXTOS_RANKINGS, LIMITE_RANKINGS, renderer, tex);
+
+    cod = apiObtenerRankings(
+        cGlobal -> socket,
+        &cantObt,
+        LIMITE_RANKINGS,
+        cGlobal -> salteoRankings,
+        _mostrarRankCompletoSDL,
+        &ctx
+    );
+
+    if (cod == OK) {
+        if (cantObt == 0) {
+            cGlobal -> salteoRankings = 0;
+            strcpy(tex->texts[TEXT_PRESIONEENTER].text, "[Presione enter para volver al menu]");
+            GHP_updateTextTexture(renderer, tex, TEXT_PRESIONEENTER, TAM_FUENTE_GRANDE, BLACK_COLOR);
+            printf("\nFin. Enter: Volver al menu");
+        } else {
+            cGlobal -> salteoRankings += cantObt;
+            strcpy(tex->texts[TEXT_PRESIONEENTER].text, "[Presione enter para ver siguiente pagina]");
+            GHP_updateTextTexture(renderer, tex, TEXT_PRESIONEENTER, TAM_FUENTE_GRANDE, BLACK_COLOR);
+            printf("\nEnter: Proxima pagina");
+        }
+
+        // Actualiza los rankings obtenidos en cada textura.
+        for (int i = INICIO_TEXTOS_RANKINGS; i < LIMITE_RANKINGS; i++)
+            GHP_updateTextTexture(renderer, tex, i, TAM_FUENTE_GRANDE, BLACK_COLOR);
+
+        cGlobal->cantRankings = 0;
+
+    } else {
+        cGlobal -> salteoRankings = 0;
+        strcpy(tex->texts[INICIO_TEXTOS_RANKINGS].text, "Error obteniendo los rankings.");
+        GHP_updateTextTexture(renderer, tex, INICIO_TEXTOS_RANKINGS, TAM_FUENTE_GRANDE, RED_COLOR);
+        strcpy(tex->texts[TEXT_PRESIONEENTER].text, "[Presione enter para volver al menu]");
+        GHP_updateTextTexture(renderer, tex, TEXT_PRESIONEENTER, TAM_FUENTE_GRANDE, BLACK_COLOR);
+        printf("\nError obteniendo los rankings.\n");
     }
 }
 
@@ -817,17 +770,16 @@ void _mostrarMovListaSDL(void* elemLista, void* infoExtra) {
     char textoAAgregar[10] = "";
 
     if (info->regs_en_ult_linea >= 10) {
-        if (info->ult_linea <= 10) {
-            info->ult_linea++;
-            info->regs_en_ult_linea=0;
-        }
-        else
+        if (info->ult_linea > 10)
             return;
+
+        info->ult_linea++;
+        info->regs_en_ult_linea=0;
     }
+
     texto = info->tex->texts[info->ult_linea].text;
     sprintf(textoAAgregar, "(%d,%d) ", coord->x, coord->y);
     strcat(texto, textoAAgregar);
-    GHP_updateTextTexture(info->renderer, info->tex, info->ult_linea - INICIO_TEXTOS_MOVS, 20, BLACK_COLOR);
+    GHP_updateTextTexture(info->renderer, info->tex, info->ult_linea - INICIO_TEXTOS_MOVS, TAM_FUENTE_CHICO, BLACK_COLOR);
     info->regs_en_ult_linea++;
 }
-

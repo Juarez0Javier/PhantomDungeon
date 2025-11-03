@@ -382,7 +382,7 @@ void bifurcacionesCaminoPrincial (int filas, int cols, tPos posE, tPos posS, cha
     encontrado = false;
 
 
-    //BFS: continúa mientras haya nodos en la cola y no se haya encontrado la meta.
+    //BFS: continï¿½a mientras haya nodos en la cola y no se haya encontrado la meta.
     while (!colaVacia(&colaBFS) && !encontrado)
     {
 
@@ -421,7 +421,7 @@ void bifurcacionesCaminoPrincial (int filas, int cols, tPos posE, tPos posS, cha
         }
     }
 
-    //Reconstrucción del camino
+    //Reconstrucciï¿½n del camino
     if (encontrado)
     {
 

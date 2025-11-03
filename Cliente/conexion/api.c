@@ -4,7 +4,7 @@
 #include "../../libs/Comun/conexion.h"
 #include <stdio.h>
 
-int apiCrearJugador(SOCKET sock, unsigned* id, const char* nombre, const char* email, const char* contrasenia) {
+int apiCrearJugador(SOCKET sock, unsigned* id, const char* nombre) {
 
     char peticion[TAM_BUFFER], respuesta[TAM_BUFFER];
     char *actPet = peticion, *actRes = respuesta;
@@ -14,8 +14,6 @@ int apiCrearJugador(SOCKET sock, unsigned* id, const char* nombre, const char* e
     // Carga el codigo de operacion y los parametros.
     cargarCampo(&codPet, sizeof(codPet), &actPet);
     cargarCampoStr(nombre, &actPet);
-    cargarCampoStr(email, &actPet);
-    cargarCampoStr(contrasenia, &actPet);
     tamPeticion = actPet - peticion;
 
     if (!enviarPeticion(sock, tamPeticion, peticion, respuesta))

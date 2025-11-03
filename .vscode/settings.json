@@ -10,6 +10,8 @@
         "string.h": "c",
         "api.h": "c",
         "global.h": "c",
-        "mapa.h": "c"
+        "mapa.h": "c",
+        "sstream": "c",
+        "type_traits": "c"
     }
 }

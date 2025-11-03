@@ -1,15 +1,12 @@
 #ifndef MODELOS_H_INCLUDED
 #define MODELOS_H_INCLUDED
 
-#define TAM_NOMBRE 100
-#define TAM_EMAIL 255
-#define TAM_CONTRASENIA 64
+#define TAM_NOMBRE 50
 
+// Se le pueden aniadir mas campos, pero en nuestro caso, lo dejamos sencillo.
 typedef struct {
     unsigned id;
     char nombre[TAM_NOMBRE +1];
-    char email[TAM_EMAIL +1];
-    char contrasenia[TAM_CONTRASENIA +1];
 } Jugador;
 
 typedef struct {

@@ -1,6 +1,7 @@
 #include "./string.h"
 #include "../Comun/comun.h"
 #include <string.h>
+#include <stdlib.h>
 
 void leerStr(char* str, unsigned tam, FILE* iostream) {
     char* act = str;
@@ -41,6 +42,29 @@ void trimStr(char* str) {
     *fin = '\0';
 
     memcpy(str, ini, fin - ini +1);
+}
+
+bool validarStrNoVacio(const char* str, unsigned tam) {
+
+    char* recortado;
+    bool validez;
+
+    if (!str)
+        return false;
+
+    recortado = malloc(tam +1);
+
+    if (!recortado)
+        return false;
+
+    strncpy(recortado, str, tam);
+    recortado[tam] = '\0';
+
+    trimStr(recortado);
+    validez = strlen(recortado) > 0;
+
+    free(recortado);
+    return validez;
 }
 
 void ingrStrNoVacio(char* str, unsigned tam, const char* msjError) {

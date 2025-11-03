@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int _guardarJugador(unsigned* id, const char* nombre, const char* email, const char* contrasenia, tArbol* jugadores);
+int _guardarJugador(unsigned* id, const char* nombre, tArbol* jugadores);
 
 unsigned crearJugador(char* actPet, char* respuesta, tArbol* jugadores) {
 
@@ -16,28 +16,16 @@ unsigned crearJugador(char* actPet, char* respuesta, tArbol* jugadores) {
     char* actRes = respuesta;
 
     char nombre[TAM_NOMBRE +1];
-    char email[TAM_EMAIL +1];
-    char contrasenia[TAM_CONTRASENIA +1];
 
     leerCampoStr(nombre, &actPet);
-    leerCampoStr(email, &actPet);
-    leerCampoStr(contrasenia, &actPet);
 
     // Validacion de campos.
     if (!validarCampoStr(nombre, TAM_NOMBRE))
         return ERR_FORMATO;
 
-    if (!validarCampoStr(email, TAM_EMAIL))
-        return ERR_FORMATO;
-
-    if (!validarCampoStr(contrasenia, TAM_CONTRASENIA))
-        return ERR_FORMATO;
-
     trimStr(nombre);
-    trimStr(email);
-    // No se puede recortar una contrasenia con trim.
 
-    codRespuesta = _guardarJugador(&id, nombre, email, contrasenia, jugadores);
+    codRespuesta = _guardarJugador(&id, nombre, jugadores);
 
     cargarCampo(&codRespuesta, sizeof(codRespuesta), &actRes);
     cargarCampo(&id, sizeof(id), &actRes);
@@ -104,7 +92,7 @@ unsigned buscarJugador(char* actPet, char* respuesta, tArbol* jugadores) {
 }
 
 // Crea y guarda a un jugador en la base de datos. Devuelve su ID si tiene exito.
-int _guardarJugador(unsigned* id, const char* nombre, const char* email, const char* contrasenia, tArbol* jugadores) {
+int _guardarJugador(unsigned* id, const char* nombre, tArbol* jugadores) {
 
     FILE *archJugadores, *archJugadoresIdx, *archRankings;
     Jugador jugador;
@@ -149,8 +137,6 @@ int _guardarJugador(unsigned* id, const char* nombre, const char* email, const c
 
     // Crea al jugador.
     strcpy(jugador.nombre, nombre);
-    strcpy(jugador.email, email);
-    strcpy(jugador.contrasenia, contrasenia);
 
     // Crea el indice.
     fseek(archJugadoresIdx, 0, SEEK_END);

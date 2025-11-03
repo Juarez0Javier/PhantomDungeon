@@ -53,7 +53,6 @@ void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData)
     Seccion secciones[] = {
         {initMenu, handlerMenu, NULL},
         {initIngresoNombre, handlerIngresoNombre, renderIngresoNombre},
-        {initConfirmarReg, handlerConfirmarReg, renderConfirmarReg},
         {initJuegoCorriendo, handleJuegoCorriendo, renderJuegoCorriendo},
         {initDerrota, handlerDerrota, NULL},
         {initVictoria, handlerVictoria, NULL},

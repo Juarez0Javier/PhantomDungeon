@@ -43,7 +43,7 @@
 #define CONFIG_MAX_NUM_PREM 3
 #define CONFIG_MAX_VIDAS_EXTRA 3
 // Configuracion de video
-#define FPS 30
+#define FPS 20
 #define DELAY_DE_FRAMES 1000/FPS
 #define COOLDOWN_MOV_JUGADOR 100 // aprox ms
 
@@ -66,13 +66,12 @@
 // Secciones de juego
 #define SECCION_MENU 0
 #define SECCION_INGRESO_NOMBRE 1
-#define SECCION_CONFIRMAR_REG 2
-#define SECCION_PARTIDA 3
-#define SECCION_DERROTA 4
-#define SECCION_VICTORIA 5
-#define SECCION_RANKINGS 6
-#define SECCION_CONFIGS 7
-#define SECCION_VERMOVS 8
+#define SECCION_PARTIDA 2
+#define SECCION_DERROTA 3
+#define SECCION_VICTORIA 4
+#define SECCION_RANKINGS 5
+#define SECCION_CONFIGS 6
+#define SECCION_VERMOVS 7
 #define SECCION_SALIR_DIRECTO -1
 
 // Rankings
@@ -105,18 +104,27 @@
 // constantes 0-10 quedan reservadas para propositos generales
 #define TEXT_ENTRADANOMBREJUGADOR 11
 #define TEXT_ERR_NOMBRE_JUGADOR 12
-#define TEXT_RANKING_CABECERA 13
+#define TEXT_CABECERA_O_TITULO 13
 #define TEXT_ENTRADANOMBREMENSAJE 14
 #define AMMOUNT_TEXTS 15
+
+#define TAM_FUENTE_CHICO 20
+#define TAM_FUENTE_GRANDE 30
+#define TAM_MAX_UINT_A_STR 10 // El tamanio maximo que puede ocupar un unsigned parseado a string.
+
 // propositos generales renombrados para particulares
 #define INICIO_TEXTOS_RANKINGS 0
 #define TEXT_PRESIONEENTER LIMITE_RANKINGS
 #define INICIO_TEXTOS_CONFIGS 0
 #define CANT_CONFIGS 6
+#define TAM_MAX_NOMBRE_CONFIG 101
 #define INICIO_TEXTOS_MOVS 0
 #define CANT_LINEAS_MOVS 10
+#define INICIO_TEXTOS_PARTIDAS 0
 #define TEXT_VIDAS 0
 #define TEXT_PUNTUACION 1
+#define TEXT_PREMIOS 2
+#define CANT_TEXTOS_PARTIDAS 3
 
 // Valores de retorno
 #define NO_ESTABLECIDO -1

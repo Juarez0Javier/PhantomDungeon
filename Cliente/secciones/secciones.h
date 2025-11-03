@@ -10,10 +10,7 @@
 #include"../mapa/mapaRandom.h"
 #include "../movimiento/movimiento.h"
 
-#define MAX_LEN_SETTINGS_TEXT 10
-
 #define INPUTCHARSETVAL(x) ((x>47 && x<58) || x==120 || x=='%' || x=='/')
-
 
 #ifndef _WIN32
 #include <windows.h>
@@ -27,6 +24,18 @@ typedef struct {
     void (*render)(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 } Seccion;
 
+typedef struct {
+    tContextoGlobal* cGlobal;
+    GHP_TexturesData* tex;
+} tCTex;
+
+typedef struct {
+    int ult_linea;
+    int regs_en_ult_linea;
+    GHP_TexturesData* tex;
+    SDL_Renderer* renderer;
+} ctxImpReg;
+
 // here should be functions of specific menus
 // also the mesh updater
 // and the init, handler and render for each menu
@@ -37,10 +46,6 @@ void handlerMenu(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesD
 void initIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
 void renderIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
-
-void initConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
-void handlerConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
-void renderConfirmarReg(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 
 void initJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handleJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);

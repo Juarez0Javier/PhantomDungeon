@@ -8,8 +8,17 @@ typedef struct {
     GHP_TexturesData* tex;
 } tCTex;
 
+typedef struct {
+    int ult_linea;
+    int regs_en_ult_linea;
+    GHP_TexturesData* tex;
+    SDL_Renderer* renderer;
+} ctxImpReg;
+
 bool buscarYCrearJugador (SOCKET sock, unsigned* id);
 bool _procesarNombre(tContextoGlobal* cGlobal);
+void _cargarTexsConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void _mostrarMovListaSDL(void* elemLista, void* infoExtra);
 
 void impRankCompleto(void* elem, void* extra) {
     RankingCompleto* ranking = (RankingCompleto*) elem;
@@ -29,7 +38,7 @@ void impRankCompleto(void* elem, void* extra) {
 
     ctx->cGlobal->cantRankings++;
 
-    printf("%d\n", ctx->cGlobal->salteoRankings);
+    //printf("%d\n", ctx->cGlobal->salteoRankings);
     printf("%d\t%s\t%d\n", ranking->idJugador, ranking->nombre, ranking->puntTotal);
 }
 
@@ -56,6 +65,7 @@ void initMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesDat
     GHP_renderButton(renderer, &tex->buttons[BUT_JUGAR_GRANDE_A_NOMBRE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
     GHP_renderButton(renderer, &tex->buttons[BUT_SALIR_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.4);
     GHP_renderButton(renderer, &tex->buttons[BUT_VERCONFIG_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.6);
+    GHP_renderButton(renderer, &tex->buttons[BUT_VERRANKING_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.8);
 }
 
 void handlerMenu (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
@@ -362,6 +372,7 @@ void renderJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP
 
     if (!partida -> pausado) {
         system("cls");
+        GHP_renderBG(renderer,tex,WIDTH,HEIGHT);
 
         printf("=======================\n");
         printf("Vidas: %d\n", partida -> vidasRestantes);
@@ -374,8 +385,14 @@ void renderJuegoCorriendo (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP
         mostrarMapa(&partida -> mapa);
         actualizarMapaRender(renderer, &partida->mapa, tex, tex->active_mesh);
 
-        // De vuelta porque sino queda como si estuviera pausado.
         GHP_renderButton(renderer, &tex->buttons[BUT_PAUSA_CHICO], WIDTH*0.41, HEIGHT*0.01);
+        GHP_renderButton(renderer, &tex->buttons[BUT_MENU_CHICO], WIDTH*0.21, HEIGHT*0.01);
+        GHP_renderButton(renderer, &tex->buttons[BUT_SALIR_CHICO], WIDTH*0.61, HEIGHT*0.01);
+
+        sprintf(tex->texts[TEXT_VIDAS].text, "Vidas: %d", cGlobal->partida.vidasRestantes);
+        sprintf(tex->texts[TEXT_PUNTUACION].text, "Puntuacion: %d", cGlobal->partida.puntuacion);
+        GHP_renderText(renderer, tex, TEXT_VIDAS, 20, WHITE_COLOR, 5, 5);
+        GHP_renderText(renderer, tex, TEXT_PUNTUACION, 20, WHITE_COLOR, 610, 5);
 
     } else {
         // agrisando el boton de pausa y el tablero
@@ -399,11 +416,12 @@ void initDerrota (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textures
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
+    GHP_renderButton(renderer, &tex->buttons[BUT_VERMOVIMIENTOS_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.4);
     // Mostrar registro de movmientos.
 }
 
 void handlerDerrota(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
-    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE], tex->buttons[BUT_VERMOVIMIENTOS_GRANDE]};
 
     switch (event -> key.keysym.sym) {
         case SDLK_ESCAPE:
@@ -414,7 +432,10 @@ void handlerDerrota(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textur
             break;
     }
 
-    handleButtonsClick(botonesActivos, 1, &(cGlobal -> partida), &(cGlobal -> seccion), event);
+    handleButtonsClick(botonesActivos, 2, &(cGlobal -> partida), &(cGlobal -> seccion), event);
+
+    if (cGlobal->seccion != SECCION_DERROTA && cGlobal->seccion != SECCION_VERMOVS)
+        vaciarLista(&cGlobal->partida.regMovs);
 }
 
 void initVictoria (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
@@ -430,11 +451,12 @@ void initVictoria (tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Texture
 
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
     GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
+    GHP_renderButton(renderer, &tex->buttons[BUT_VERMOVIMIENTOS_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.4);
     // Mostrar registro de movmientos.
 }
 
 void handlerVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
-    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE], tex->buttons[BUT_VERMOVIMIENTOS_GRANDE]};
 
     switch (event -> key.keysym.sym) {
         case SDLK_ESCAPE:
@@ -445,7 +467,10 @@ void handlerVictoria(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textu
             break;
     }
 
-    handleButtonsClick(botonesActivos, 1, &(cGlobal -> partida), &(cGlobal -> seccion), event);
+    handleButtonsClick(botonesActivos, 2, &(cGlobal -> partida), &(cGlobal -> seccion), event);
+
+    if (cGlobal->seccion != SECCION_VICTORIA && cGlobal->seccion != SECCION_VERMOVS)
+        vaciarLista(&cGlobal->partida.regMovs);
 }
 
 void initVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
@@ -493,6 +518,9 @@ void initVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textu
     for (int i = INICIO_TEXTOS_RANKINGS; i < LIMITE_RANKINGS + INICIO_TEXTOS_RANKINGS; i++) {
         GHP_updateTextTexture(renderer, tex, i, 30, BLACK_COLOR); // actualizar cada texture correctamente
     }
+
+    strcpy(tex->texts[TEXT_PRESIONEENTER].text,"[Presione enter para ver siguiente pagina]");
+    GHP_updateTextTexture(renderer, tex, TEXT_PRESIONEENTER, 30, WHITE_COLOR);
 }
 
 void handlerVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
@@ -566,8 +594,15 @@ void renderVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Tex
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
 
     for (int i = INICIO_TEXTOS_RANKINGS; i < LIMITE_RANKINGS + INICIO_TEXTOS_RANKINGS; i++) {
-        GHP_renderTexture(renderer, tex->texts[i].tex, 52, HEIGHT * (i - INICIO_TEXTOS_RANKINGS) * 0.1);
+        GHP_renderTexture(renderer, tex->texts[i].tex, 52, HEIGHT * (i - INICIO_TEXTOS_RANKINGS) * 0.1 + 52);
     }
+
+    if (strcmp(tex->texts[INICIO_TEXTOS_RANKINGS].text, "Fin del ranking") == 0) {
+        strcpy(tex->texts[TEXT_PRESIONEENTER].text,"[Presione enter para volver al menu]");
+        GHP_updateTextTexture(renderer, tex, TEXT_PRESIONEENTER, 30, WHITE_COLOR);
+    }
+
+    GHP_renderTexture(renderer, tex->texts[TEXT_PRESIONEENTER].tex, 52, HEIGHT - 75);
 }
 
 void initVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
@@ -575,8 +610,14 @@ void initVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Textur
     mostrarConfigs(&(cGlobal -> configData));
     printf("\nPresione enter para volver al menu...");
 
+    _cargarTexsConfigs(cGlobal, renderer, tex);
+
     GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
-    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.2);
+    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.8);
+
+    for (int i=0; i<CANT_CONFIGS; i++) {
+        GHP_renderTexture(renderer, tex->texts[i].tex, 52, HEIGHT * (i - INICIO_TEXTOS_CONFIGS) * 0.1 + 20);
+    }
 }
 
 void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
@@ -588,7 +629,7 @@ void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Tex
                 cGlobal -> seccion = SECCION_MENU;
                 break;
             case SDLK_ESCAPE:
-                cGlobal -> seccion = SECCION_SALIR_DIRECTO;
+                cGlobal -> seccion = SECCION_MENU;
                 break;
         }
     }
@@ -611,6 +652,39 @@ void handleButtonsClick(GHP_Button* botones, int cantidad, Partida* partida, int
     }
 }
 
+void initVerMovs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    ctxImpReg lineasImpresas = {0,0, tex, renderer};
+
+    for (int i=0; i<CANT_LINEAS_MOVS; i++)
+        tex->texts[i-INICIO_TEXTOS_MOVS].text[0] = '\0';
+
+    recorrerListaConInfoExtra(&cGlobal->partida.regMovs, _mostrarMovListaSDL, &lineasImpresas);
+
+    GHP_renderBG(renderer, tex, WIDTH, HEIGHT);
+    for (int i=0; i<CANT_LINEAS_MOVS; i++)
+        GHP_renderTexture(renderer, tex->texts[i].tex, 52, HEIGHT * 0.05 * (i - INICIO_TEXTOS_CONFIGS) + 10);
+
+    GHP_renderButton(renderer, &tex->buttons[BUT_MENU_GRANDE], (WIDTH-(231-28))/2 , HEIGHT*0.7);
+}
+
+void handlerVerMovs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event) {
+    GHP_Button botonesActivos[] = {tex->buttons[BUT_MENU_GRANDE]};
+
+    switch (event -> key.keysym.sym) {
+        case SDLK_ESCAPE:
+            cGlobal -> seccion = SECCION_MENU;
+            break;
+        case SDLK_RETURN:
+            cGlobal -> seccion = SECCION_MENU;
+            break;
+    }
+
+    handleButtonsClick(botonesActivos, 1, &(cGlobal -> partida), &(cGlobal -> seccion), event);
+
+    if (cGlobal->seccion != SECCION_VERMOVS)
+        vaciarLista(&cGlobal->partida.regMovs);
+}
+
 void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador) {
 
     unsigned idPartida, cMovs = 0;
@@ -620,7 +694,6 @@ void _procesarFinPartida(Partida* partida, SOCKET socket, unsigned idJugador) {
 
     mostrarLista(&partida -> regMovs, mostrarCoordenada);
     reducirLista(&partida -> regMovs, contarMovs, &cMovs);
-    vaciarLista(&partida -> regMovs);
 
     // Una vez finaliza la partida, si puede, la guarda en el servidor.
     if (socket != INVALID_SOCKET) {
@@ -726,3 +799,35 @@ bool buscarYCrearJugador (SOCKET sock, unsigned* id) {
 
     return !err;
 }
+
+void _cargarTexsConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {
+    char configsNombres[CANT_CONFIGS][100] = {"filas", "columnas", "vidas_inicio", "maximo_numero_fantasmas", "maximo_numero_premios", "maximo_vidas_extra"};
+    float* configsValores[] = {&cGlobal->configData.filas, &cGlobal->configData.columnas, &cGlobal->configData.vidas_inicio,
+        &cGlobal->configData.maximo_numero_fantasmas, &cGlobal->configData.maximo_numero_premios, &cGlobal->configData.maximo_vidas_extra};
+    for (int i=0; i<CANT_CONFIGS; i++) {
+        sprintf(tex->texts[i - INICIO_TEXTOS_CONFIGS].text, "%s: %.0f", configsNombres[i], *(configsValores[i]));
+        GHP_updateTextTexture(renderer, tex, i, 30, BLACK_COLOR);
+    }
+}
+
+void _mostrarMovListaSDL(void* elemLista, void* infoExtra) {
+    ctxImpReg* info = (ctxImpReg*)infoExtra;
+    Coordenada* coord = (Coordenada*)elemLista;
+    char* texto;
+    char textoAAgregar[10] = "";
+
+    if (info->regs_en_ult_linea >= 10) {
+        if (info->ult_linea <= 10) {
+            info->ult_linea++;
+            info->regs_en_ult_linea=0;
+        }
+        else
+            return;
+    }
+    texto = info->tex->texts[info->ult_linea].text;
+    sprintf(textoAAgregar, "(%d,%d) ", coord->x, coord->y);
+    strcat(texto, textoAAgregar);
+    GHP_updateTextTexture(info->renderer, info->tex, info->ult_linea - INICIO_TEXTOS_MOVS, 20, BLACK_COLOR);
+    info->regs_en_ult_linea++;
+}
+

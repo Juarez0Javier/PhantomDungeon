@@ -59,6 +59,9 @@ void renderVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Tex
 void initVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
 
+void initVerMovs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
+void handlerVerMovs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
+
 // otros
 void handleButtonsClick(GHP_Button* botones, int cantidad, Partida* partida, int* seccion, SDL_Event* event);
 void dibujarRectanguloParaEntrada(SDL_Renderer* renderer);

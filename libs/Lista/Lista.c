@@ -181,6 +181,13 @@ void recorrerLista(const tLista* pl, Acc acc) {
     }
 }
 
+void recorrerListaConInfoExtra(const tLista* pl, Acc acc, void* infoExtra) {
+    while (*pl) {
+        acc((*pl) -> info, infoExtra);
+        pl = &((*pl) -> sig);
+    }
+}
+
 void reducirLista(const tLista* pl, Acc acc, void* dst) {
     while (*pl) {
         acc((*pl) -> info, dst);
@@ -245,7 +252,7 @@ void ordenamientoSeleccion(tLista* pl, Cmp cmp) {
         while (*q) {
             if (cmp((*q) -> info, (*min) -> info) < 0)
                 min = q;
-            
+
             q = &((*q) -> sig);
         }
 

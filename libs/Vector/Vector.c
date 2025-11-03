@@ -71,6 +71,11 @@ int vectorGrabar(Vector* v, const char* nomArch) {
     return OK;
 }
 
+const void * vectorObtenerElementoSegunPos(Vector * vec, unsigned pos)
+{
+    return((char*)vec->vec + pos*vec->tamElem); //hecho de esta forma pq luis dijo que la otra forma era ilegal!
+}
+
 int vectorOrdInsertar(Vector* v, void* elem, Cmp cmp) {
 
     if (v -> tam == v -> cap) {

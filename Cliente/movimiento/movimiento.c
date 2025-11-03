@@ -37,47 +37,95 @@ void calcularMovJugador (Entidad* jugador, Mapa* mapa, char direccion, tCola* mo
     }
 }
 
-// Calcula el próximo movimiento de cada fantasma hacia el jugador
-void calcularMovFantasmas(Vector* fantasmas, Mapa* mapa, tCola* movs, Entidad* jugador, unsigned deltaTime)
+pos ejecutarBFS_y_obtenerPrimerPaso(Mapa* mapa, pos inicio, pos meta, int ** mat_visitado, pos ** mat_padre)
 {
     tCola colaBFS;
-    Movimiento mov_final;
-    // Estas matrices guardan el estado de exploracion y la ruta
-    int ** mat_visitado = (int**)crearMatriz(mapa->filas, mapa->cols, sizeof(int));
-    int ** mat_padreX  = (int**)crearMatriz(mapa->filas, mapa->cols, sizeof(int));
-    int ** mat_padreY  = (int**)crearMatriz(mapa->filas, mapa->cols, sizeof(int));
-    //verificar si son null
-
-    // Movimiento ORTOGONAL
-    int dx[8] = { 0, 0, 1, -1};
-    int dy[8] = {-1, 1, 0, 0};
-    Entidad* f;
-    size_t i=0;
-    int y, x, d;
-    int metaX, metaY;
-    bool encontrado;
-    // Variables del BFS
-    Movimiento m_actual;
-    Movimiento m_nueva;
-    int nx, ny;
-
-    // Variables de reconstruccion
-    int r_actualX, r_actualY;
-    int anteriorX, anteriorY;
-    bool retrocediendo;
-    char val;
-    bool transitable;
-
-
+    int dx[8] = {0,0,-1,1,1,-1,1,-1};
+    int dy[8] = {-1,1,0,0,-1,-1,1,1};
+    int d;
+    pos pos_actual, pos_siguiente;
+    bool encontrado = false;
+    pos r_actual;
+    pos anterior;
+    pos no_encontrado = {-1, -1};
 
     crearCola(&colaBFS);
 
+    // Configuración inicial
+    ponerEnCola(&colaBFS, &inicio, sizeof(pos));
+    ((int*)mat_visitado[inicio.y])[inicio.x] = true;
+    mat_padre[inicio.y][inicio.x] = inicio;
+
+    // Bucle BFS
+    while (!colaVacia(&colaBFS) && !encontrado) {
+
+        if (sacarDeCola(&colaBFS, &pos_actual, sizeof(pos))) {
+            d = 0;
+            while (d < 8) {
+
+                pos_siguiente.x = pos_actual.x + dx[d];
+                pos_siguiente.y = pos_actual.y + dy[d];
+
+                if (pos_siguiente.x >= 0 && pos_siguiente.x < mapa->cols &&
+                    pos_siguiente.y >= 0 && pos_siguiente.y < mapa->filas) {
+
+                    if ((((int*)mat_visitado[pos_siguiente.y])[pos_siguiente.x] == false) &&
+                        (mapa->data[pos_siguiente.y][pos_siguiente.x] != PARED)) {
+
+                        ((int*)mat_visitado[pos_siguiente.y])[pos_siguiente.x] = true;
+                        mat_padre[pos_siguiente.y][pos_siguiente.x] = pos_actual;
+
+                        ponerEnCola(&colaBFS, &pos_siguiente, sizeof(pos));
+
+                        // Si llegamos al jugador, la bandera 'encontrado' se activa
+                        if (pos_siguiente.x == meta.x && pos_siguiente.y == meta.y) {
+                            encontrado = true;
+                        }
+                    }
+                }
+                d++;
+            }
+        }
+    }
+
+    vaciarCola(&colaBFS);
+
+    // Reconstrucción y retorno
+    if (encontrado) {
+        r_actual = meta;
+        anterior = inicio;
+
+        while (!(r_actual.x == inicio.x && r_actual.y == inicio.y)) {
+            anterior = r_actual;
+            r_actual = mat_padre[anterior.y][anterior.x];
+        }
+
+        return anterior;
+    } else {
+        return no_encontrado;
+    }
+}
+
+void calcularMovFantasmas(Vector* fantasmas, Mapa* mapa, tCola* movs, Entidad* jugador, unsigned deltaTime)
+{
+    pos ** mat_padre = (pos**)crearMatriz(mapa->filas, mapa->cols, sizeof(pos));
+    int ** mat_visitado = (int**)crearMatriz(mapa->filas, mapa->cols, sizeof(int));
+    Movimiento mov_final;
+    Entidad* f;
+    size_t i = 0;
+    int y, x;
+    pos meta = {jugador->x, jugador->y};
+    pos inicio;
+    pos primer_paso;
+    char val;
+    bool transitable;
+    bool cooldownPermiteMoverse;
+
     while (i < fantasmas->tam) {
-        bool cooldownPermiteMoverse = true;
+        cooldownPermiteMoverse = true;
+        f = (Entidad*)(vectorObtenerElementoSegunPos(fantasmas, i));
 
-        //f = (Entidad*)((char*)fantasmas->vec + i * fantasmas->tamElem);
-        f= (Entidad*)(vectorObtenerElementoSegunPos(fantasmas, i));
-
+        // Control de Cooldown (Delta Time)
         if (f -> ticksUltimoMov < f -> ticksEntreMovs) {
             f -> ticksUltimoMov += deltaTime;
             cooldownPermiteMoverse = false;
@@ -85,7 +133,11 @@ void calcularMovFantasmas(Vector* fantasmas, Mapa* mapa, tCola* movs, Entidad* j
 
         if (f->tipo == 'F' && f->eliminado == false && cooldownPermiteMoverse) {
 
-            // Reinicia la matriz de visita (todos como no visitados)
+            f -> ticksUltimoMov = 0;
+            inicio.x = f->x;
+            inicio.y = f->y;
+
+            // Reiniciar la matriz de visitados
             y = 0;
             while (y < mapa->filas) {
                 x = 0;
@@ -96,117 +148,32 @@ void calcularMovFantasmas(Vector* fantasmas, Mapa* mapa, tCola* movs, Entidad* j
                 y++;
             }
 
-            vaciarCola(&colaBFS);
+            // Llamada a la subfunción de Pathfinding
+            primer_paso = ejecutarBFS_y_obtenerPrimerPaso(mapa, inicio, meta, mat_visitado, mat_padre);
 
-            m_actual.x = f->x;
-            m_actual.y = f->y;
-            m_actual.ent = f;
-
-            ponerEnCola(&colaBFS, &m_actual, sizeof(Movimiento));
-
-            ((int*)mat_visitado[f->y])[f->x] = true;
-            ((int*)mat_padreX[f->y])[f->x] = f->x;
-            ((int*)mat_padreY[f->y])[f->x] = f->y;
-
-            metaX = jugador->x;
-            metaY = jugador->y;
-            encontrado = false;
-
-            //BFS: continúa mientras haya nodos en la cola y no se haya encontrado la meta.
-            while (!colaVacia(&colaBFS) && !encontrado) {
-
-                if (sacarDeCola(&colaBFS, &m_actual, sizeof(Movimiento))) {
-                    d = 0;
-                    while (d < 4) { // 4 direcciones
-
-                        nx = m_actual.x + dx[d];
-                        ny = m_actual.y + dy[d];
-                        if (nx >= 0 && nx < mapa->cols && ny >= 0 && ny < mapa->filas) {
-
-                            if ((((int*)mat_visitado[ny])[nx] == false) && (mapa->data[ny][nx] !=PARED) && !encontrado) {
-
-                                // Marca como visitado, guarda padre y encola
-                                ((int*)mat_visitado[ny])[nx] = true;
-                                ((int*)mat_padreX[ny])[nx] = m_actual.x;
-                                ((int*)mat_padreY[ny])[nx] = m_actual.y;
-
-                                m_nueva.x = nx;
-                                m_nueva.y = ny;
-                                m_nueva.ent = f;
-                                ponerEnCola(&colaBFS, &m_nueva, sizeof(Movimiento));
-
-                                // Si llega al jugador
-                                if (nx == metaX && ny == metaY) {
-                                    encontrado = true;
-                                }
-                            }
-                        }
-                        d++;
-                    }
-                }
-            }
-
-            //Reconstrucción del camino
-            if (encontrado) {
-
-                r_actualX = metaX;
-                r_actualY = metaY;
-
-                retrocediendo = true;
-                anteriorX = f->x;
-                anteriorY = f->y;
-
-                // El bucle busca el nodo 'anteriorX, anteriorY' y su padre es el fantasma 'f'
-                while (retrocediendo) {
-
-                    if (!(r_actualX == f->x && r_actualY == f->y)) {
-
-                        anteriorX = r_actualX;
-                        anteriorY = r_actualY;
-                        r_actualX = ((int*)mat_padreX[anteriorY])[anteriorX];
-                        r_actualY = ((int*)mat_padreY[anteriorY])[anteriorX];
-
-                        // si el padre al que saltamos es el fantasma
-                        if (r_actualX == f->x && r_actualY == f->y) {
-                            retrocediendo = false;
-                        }
-
-                    } else {
-                        retrocediendo = false;
-                    }
-                }
-
-                // Al salir (anteriorX, anteriorY) es el primer paso
-                nx = anteriorX;
-                ny = anteriorY;
+            // Verifica si se encontró un camino válido
+            if (primer_paso.x != -1) {
 
                 // Encolar el movimiento final
-                if (nx >= 0 && nx < mapa->cols && ny >= 0 && ny < mapa->filas) {
-                    val = mapa->data[ny][nx];
-                    transitable = (val == CAMINO || val == PREMIO || val == VIDA || val == SALIDA);
+                val = mapa->data[primer_paso.y][primer_paso.x];
+                transitable = (val == CAMINO || val == PREMIO || val == VIDA || val == SALIDA || val == JUGADOR);
 
-                    if (transitable) {
-                        mov_final.ent= f;
-                        mov_final.x=nx;
-                        mov_final.y=ny;
-                        ponerEnCola(movs, &mov_final, sizeof(Movimiento));
-                    }
+                if (transitable) {
+                    mov_final.ent = f;
+                    mov_final.x = primer_paso.x;
+                    mov_final.y = primer_paso.y;
+                    ponerEnCola(movs, &mov_final, sizeof(Movimiento));
                 }
             }
         }
         i++;
     }
 
-    vaciarCola(&colaBFS);
+    // Liberación de recursos
     destruirMatriz(mapa->filas, (void**)mat_visitado);
-    destruirMatriz(mapa->filas, (void**)mat_padreX);
-    destruirMatriz(mapa->filas, (void**)mat_padreY);
+    destruirMatriz(mapa->filas, (void**)mat_padre);
 }
 
-const void * vectorObtenerElementoSegunPos(Vector * vec, unsigned pos)
-{
-    return((char*)vec->vec + pos*vec->tamElem); //hecho de esta forma pq luis dijo que la otra forma era ilegal!
-}
 
 // Desencola los movimientos realizados tanto por el jugador como por los fantamas y los aplica (si se puede).
 void resolverMovimientos (Partida* partida, Mapa* mapa, tCola* movs, int* seccion) {

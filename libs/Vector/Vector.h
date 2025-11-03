@@ -52,6 +52,7 @@ void vectorDestruir (Vector* v);
 void vectorMostrar (const Vector* v, Imp imp);
 size_t _max (size_t a, size_t b);
 void* vectorPunteroAlUltimoElem(const Vector* v);
+const void * vectorObtenerElementoSegunPos(Vector * vec, unsigned pos);
 
 // Vector iterador
 

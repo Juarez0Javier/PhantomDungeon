@@ -29,17 +29,6 @@ typedef struct {
     GHP_TexturesData* tex;
 } tCTex;
 
-typedef struct {
-    int ult_linea;
-    int regs_en_ult_linea;
-    GHP_TexturesData* tex;
-    SDL_Renderer* renderer;
-} ctxImpReg;
-
-// here should be functions of specific menus
-// also the mesh updater
-// and the init, handler and render for each menu
-
 void initMenu(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handlerMenu(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
 
@@ -63,6 +52,7 @@ void renderVerRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_Tex
 
 void initVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handlerVerConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);
+void renderVerMovs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 
 void initVerMovs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void handlerVerMovs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);

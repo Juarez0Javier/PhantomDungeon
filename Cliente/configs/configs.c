@@ -29,10 +29,13 @@ bool iniciarConfig(ConfigData* configs) {
 
     for (int i = 0; i < sizeof(camposValidos) / sizeof(campoValido); i++) {
         int pos = vectorDesordBuscar(&campos, camposValidos[i].argumento, cmpCampoTxt);
-        campoConfig* campConf = (campoConfig*)campos.vec + pos;
+        campoConfig* campConf = (campoConfig*) vectorObtenerElementoSegunPos(&campos, pos);
         *(camposValidos[i].p) = campConf->valor;
         camposLeidos++;
     }
+
+    vectorDestruir(&campos);
+    fclose(archConfigs);
 
     if (camposLeidos < sizeof(camposValidos)/sizeof(campoValido))
         return false;
@@ -41,8 +44,6 @@ bool iniciarConfig(ConfigData* configs) {
         return false;
 
     mostrarConfigs(configs);
-
-    fclose(archConfigs);
     return true;
 }
 
@@ -55,10 +56,6 @@ bool validarConfig(ConfigData* configs) {
         || configs->maximo_vidas_extra < MIN_VIDAS_EXTRA || configs->maximo_vidas_extra > MAX_VIDAS_EXTRA
         || configs->vidas_inicio < MIN_VIDAS_INICIO || configs->vidas_inicio > MAX_VIDAS_INICIO
     );
-}
-
-void aplicarConfig(ConfigData* configs, Partida* partida) {
-
 }
 
 void nullConfig(ConfigData* configs) {

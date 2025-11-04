@@ -111,15 +111,17 @@
 #define TAM_FUENTE_CHICO 20
 #define TAM_FUENTE_GRANDE 30
 #define TAM_MAX_UINT_A_STR 10 // El tamanio maximo que puede ocupar un unsigned parseado a string.
+#define TAM_MAX_COORD_A_STR 8 // El tamanio maximo que puede ocupar un unsigned parseado a string.
 
 // propositos generales renombrados para particulares
 #define INICIO_TEXTOS_RANKINGS 0
-#define TEXT_PRESIONEENTER LIMITE_RANKINGS
+#define TEXT_PRESIONEENTER LIMITE_RANKINGS+1
 #define INICIO_TEXTOS_CONFIGS 0
 #define CANT_CONFIGS 6
 #define TAM_MAX_NOMBRE_CONFIG 101
 #define INICIO_TEXTOS_MOVS 0
-#define CANT_LINEAS_MOVS 10
+#define CANT_LINEAS_MOVS 8
+#define CANT_MOVS_MAX_A_MOSTRAR 8
 #define INICIO_TEXTOS_PARTIDAS 0
 #define TEXT_VIDAS 0
 #define TEXT_PUNTUACION 1

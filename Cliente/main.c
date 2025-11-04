@@ -20,7 +20,6 @@ int main (int argc, char *argv[]) {
     char* nameWindow = "PhantomDungeon";
 
     srand(time(NULL));
-    system("chcp 65001");
 
     cGlobal.socket = abrirConexion();
 
@@ -58,7 +57,7 @@ void react(SDL_Renderer* renderer, void* partidaData, GHP_TexturesData* TexData)
         {initVictoria, handlerVictoria, NULL},
         {initVerRankings, handlerVerRankings, renderVerRankings},
         {initVerConfigs, handlerVerConfigs, NULL},
-        {initVerMovs, handlerVerMovs, NULL}
+        {initVerMovs, handlerVerMovs, renderVerMovs}
     };
 
     // Relacionadas al control de frames.

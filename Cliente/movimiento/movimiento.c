@@ -40,8 +40,8 @@ void calcularMovJugador (Entidad* jugador, Mapa* mapa, char direccion, tCola* mo
 pos ejecutarBFS_y_obtenerPrimerPaso(Mapa* mapa, pos inicio, pos meta, int ** mat_visitado, pos ** mat_padre)
 {
     tCola colaBFS;
-    int dx[8] = {0,0,-1,1,1,-1,1,-1};
-    int dy[8] = {-1,1,0,0,-1,-1,1,1};
+    int dx[] = {0, 0, 1, -1};
+    int dy[] = {-1, 1, 0, 0};
     int d;
     pos pos_actual, pos_siguiente;
     bool encontrado = false;
@@ -61,7 +61,7 @@ pos ejecutarBFS_y_obtenerPrimerPaso(Mapa* mapa, pos inicio, pos meta, int ** mat
 
         if (sacarDeCola(&colaBFS, &pos_actual, sizeof(pos))) {
             d = 0;
-            while (d < 8) {
+            while (d < 4) {
 
                 pos_siguiente.x = pos_actual.x + dx[d];
                 pos_siguiente.y = pos_actual.y + dy[d];

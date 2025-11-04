@@ -2,19 +2,27 @@
 
 bool iniciarPartida(Partida* partida, ConfigData* configs, GHP_TexturesData* TexData, SDL_Renderer* renderer) {
 
+    configs -> por_defecto = false;
+
     if (!iniciarConfig(configs)) {
-        if (!resetConfig()) {
+
+        // Sobreescribe el archivo de configuraciones con parametros validos.
+        if (!resetConfig())
             return false;
-        }
+        
         iniciarConfig(configs);
+        configs -> por_defecto = true;
     }
 
     if (!crearPartida(partida, configs->filas, configs->columnas)) {
-        printf("Error creando la configuracion de partida");
+        printf("Error creando la configuracion de partida\n");
+        return false;
     }
 
-    if (iniciarTexData(TexData, renderer, partida) != OK)
+    if (iniciarTexData(TexData, renderer, partida) != OK) {
+        printf("Error creando la configuracion de video\n");
         return false;
+    }
 
     return true;
 }

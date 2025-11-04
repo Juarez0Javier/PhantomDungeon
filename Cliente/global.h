@@ -15,7 +15,6 @@ typedef struct {
     unsigned deltaTime;
     SOCKET socket;
     unsigned idJugador;
-    char nombreJugador[TAM_NOMBRE +1];
     unsigned salteoRankings;
     unsigned cantRankings;
 } tContextoGlobal;

@@ -13,6 +13,7 @@ typedef struct {
     float maximo_numero_fantasmas;
     float maximo_numero_premios;
     float maximo_vidas_extra;
+    bool por_defecto;
 } ConfigData;
 
 typedef struct {
@@ -27,7 +28,6 @@ typedef struct {
 
 bool iniciarConfig(ConfigData* configs);
 bool validarConfig(ConfigData* configs);
-void aplicarConfig(ConfigData* configs, Partida* partida); // to be filled later when what we need
 void nullConfig(ConfigData* configs);
 bool resetConfig();
 void mostrarConfigs(ConfigData* configs);

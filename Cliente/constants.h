@@ -50,18 +50,20 @@
 
 // Rutas
 // Para cuando se ejecuta de codeblocks.
-#define RUTA_LABERINTO_PRESET "./laberintos/laberinto.txt"
-#define RUTA_CONFIGS "./config.txt"
-#define RUTA_FONDO "./src/img/background.png"
-#define RUTA_ASSETS "./src/img/asset.png"
-#define RUTA_BOTONES "./src/img/botones.png"
+// #define RUTA_LABERINTO_PRESET "./laberintos/laberinto.txt"
+// #define RUTA_CONFIGS "./config.txt"
+// #define RUTA_FONDO "./src/img/background.png"
+// #define RUTA_IMG "./src/img/"
+// #define RUTA_BOTONES "./src/img/botones.png"
+// #define RUTA_FUENTE "./fnt/Consolas-Regular.ttf"
 
 // Para cuando se ejecuta del binario.
-// #define RUTA_LABERINTO_PRESET "../../laberintos/laberinto.txt"
-// #define RUTA_CONFIGS "../../config.txt"
-// #define RUTA_FONDO "../../src/img/background.png"
-// #define RUTA_ASSETS "../../src/img/asset.png"
-// #define RUTA_BOTONES "../../src/img/botones.png"
+#define RUTA_LABERINTO_PRESET "../../laberintos/laberinto.txt"
+#define RUTA_CONFIGS "../../config.txt"
+#define RUTA_FONDO "../../src/img/background.png"
+#define RUTA_IMG "../../src/img/"
+#define RUTA_BOTONES "../../src/img/botones.png"
+#define RUTA_FUENTE "../../fnt/Consolas-Regular.ttf"
 
 // Secciones de juego
 #define SECCION_MENU 0

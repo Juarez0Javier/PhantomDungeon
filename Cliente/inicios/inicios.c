@@ -9,7 +9,7 @@ bool iniciarPartida(Partida* partida, ConfigData* configs, GHP_TexturesData* Tex
         // Sobreescribe el archivo de configuraciones con parametros validos.
         if (!resetConfig())
             return false;
-        
+
         iniciarConfig(configs);
         configs -> por_defecto = true;
     }
@@ -54,13 +54,16 @@ int iniciarTexData(GHP_TexturesData* tex_data, SDL_Renderer* renderer, Partida* 
         return DIM_ERR;
     }
 
-    char path[25];
-    sprintf(path, "./src/img/asset%dx%d.png", stdDimGrid[i], stdDimGrid[i]);
-    while (GHP_loadRectAsset(renderer, path, &(tex_data->textures), AMMOUNT_TEXTURES, stdDimPix[i], stdDimPix[i], AMM_TEXT_COL_ASSET) != OK && i<= ammount_assets ){
-        // at least try to render other asset
-        printf("\nFile of field %s not found, trying to use another asset.", path);
+    char path[128];
+    sprintf(path, "%sasset%dx%d.png", RUTA_IMG, stdDimGrid[i], stdDimGrid[i]);
+
+    while (
+        GHP_loadRectAsset(renderer, path, &(tex_data->textures), AMMOUNT_TEXTURES, stdDimPix[i], stdDimPix[i], AMM_TEXT_COL_ASSET) != OK && 
+        i < ammount_assets
+    ) {
+        printf("\nFile %s not found, trying other asset.", path);
         i++;
-        sprintf(path, "img/celds%dx%d.png", stdDimGrid[i], stdDimGrid[i]);
+        sprintf(path, "%scelds%dx%d.png", RUTA_IMG, stdDimGrid[i], stdDimGrid[i]);
     }
 
     if (!tex_data->textures) {
@@ -116,9 +119,9 @@ int iniciarBotones(SDL_Renderer* renderer, GHP_TexturesData* texData) {
 
 int iniciarTextos(SDL_Renderer* renderer, GHP_TexturesData* texData) {
     SDL_Color whiteColor = {255, 255, 255, 255};
-    char path[] = "fnt/Consolas-Regular.ttf";
+
     for (int i=0; i<AMMOUNT_TEXTS; i++) {
-        GHP_newText(renderer, path, texData, &(texData->texts[i]), -1, -1, -1, whiteColor);
+        GHP_newText(renderer, RUTA_FUENTE, texData, &(texData->texts[i]), -1, -1, -1, whiteColor);
         texData->texts[i].text[0] = '\0';
     }
 

@@ -21,21 +21,23 @@ int generarMapaRandom(ConfigData* configData, Partida* partida, char nombreArch[
     partida->mapa.semilla = semilla;
 
     //Inicializando Matriz en Paredes
-    for(int i = 0; i<filas; i++)
-        for(int j = 0; j<columnas; j++)
-            mapa[i][j] = '#';
+    for(int y = 0; y<filas; y++)
+        for(int x = 0; x<columnas; x++)
+            mapa[y][x] = '#';
 
     // Vacia vector y matriz de fantasmas
     vectorVaciar(&partida->fantasmas);
-    for (int i=0; i<filas; i++)
-        for (int j=0; j<columnas; j++)
-            partida->mapa.entidades[i][j] = NULL;
+    for (int y=0; y<filas; y++)
+        for (int x=0; x<columnas; x++)
+            partida->mapa.entidades[y][x] = NULL;
 
     generarEntradaYPrimerEspacio(&pos, &dirMov, &posE, filas, columnas, mapa);
 
     generarCaminosSimples(pos, dirMov, posE, &posS, filas, columnas, mapa);
 
     generarGaleria(3,3,posE,filas,columnas,mapa);
+
+    printMapa(columnas,filas,mapa);
 
     cortarParedesParaMasCaminos(filas, columnas, mapa);
 
@@ -65,8 +67,8 @@ void generarEntradaYPrimerEspacio(tPos* pos, tPos* dirMov, tPos* posE, int filas
     dirMov->y = 0;
     dirMov->x = 0;
 
-    pos->x = 1 + (rand() % (filas - 2));
-    pos->y = 1 + (rand() % (cols - 2));
+    pos->x = 1 + (rand() % (cols - 2));
+    pos->y = 1 + (rand() % (filas - 2));
 
     switch ((rand() % 4))
     {
@@ -144,6 +146,8 @@ void generarCaminosSimples(tPos pos, tPos dirMov, tPos posE, tPos* posS, int fil
     }
     while (!pilaDVacia(&stack));
 
+
+
     posS->x = posSCan.x;
     posS->y = posSCan.y;
 
@@ -168,7 +172,7 @@ void chequearPosiblesMovimientos(int cardBloq[4], tPos pos, int filas, int colum
         cardBloq[0] = 1;
 
     if(
-        pos.x + 1 == filas - 1 ||
+        pos.x + 1 == columnas - 1 ||
         mapa[pos.y][pos.x + 1] == '.' ||
         mapa[pos.y][pos.x + 2] == '.' ||
         mapa[pos.y - 1][pos.x + 1] == '.' ||
@@ -177,7 +181,7 @@ void chequearPosiblesMovimientos(int cardBloq[4], tPos pos, int filas, int colum
         cardBloq[1] = 1;
 
     if(
-        pos.y + 1 == columnas - 1 ||
+        pos.y + 1 == filas - 1 ||
         mapa[pos.y + 1][pos.x] == '.' ||
         mapa[pos.y + 2][pos.x] == '.' ||
         mapa[pos.y + 1][pos.x + 1] == '.' ||
@@ -193,6 +197,7 @@ void chequearPosiblesMovimientos(int cardBloq[4], tPos pos, int filas, int colum
         mapa[pos.y + 1][pos.x - 1] == '.'
     )
         cardBloq[3] = 1;
+
 }
 
 bool ningunMovimientoPosible(int cardBloq[4])
@@ -230,7 +235,7 @@ tPos dirRandom (int cardBloq[4])
 
 void posicionarSalidaCandidata(tPos* posS, tPos pos, tPos posE, int filas, int columnas)
 {
-    if(pos.y == 1 && posE.y == columnas - 1)
+    if(pos.y == 1 && posE.y == filas - 1)
     {
         posS->y = pos.y - 1;
         posS->x = pos.x;
@@ -240,7 +245,7 @@ void posicionarSalidaCandidata(tPos* posS, tPos pos, tPos posE, int filas, int c
         posS->y = pos.y + 1;
         posS->x = pos.x;
     }
-    if(pos.x == 1 && posE.x == filas - 1)
+    if(pos.x == 1 && posE.x == columnas - 1)
     {
         posS->y = pos.y;
         posS->x = pos.x - 1;
@@ -257,10 +262,10 @@ void posicionarSalidaCandidata(tPos* posS, tPos pos, tPos posE, int filas, int c
 
 void taparRadioRespectoAPosEnMascara(tPos pos, int rango, int filas, int cols, char** mapaMascara)
 {
-    for(int i = pos.y - rango; i<pos.y + rango + 1; i++)
-        for(int j = pos.x - rango; j<pos.x + rango + 1; j++)
-            if(i > 0 && i < cols && j > 0 && j < filas)
-                mapaMascara[i][j] = '#';
+    for(int y = pos.y - rango; y<pos.y + rango + 1; y++)
+        for(int x = pos.x - rango; x<pos.x + rango + 1; x++)
+            if(y > 0 && y < filas && x > 0 && x < cols)
+                mapaMascara[y][x] = '#';
 }
 
 void generarGaleria (int galLong, int galAlt, tPos posE, int filas, int cols, char** mapa)
@@ -292,11 +297,11 @@ void generarGaleria (int galLong, int galAlt, tPos posE, int filas, int cols, ch
     limInfY += ajusteY;
     limSupY += ajusteY;
 
-    for(int i = limInfY; i<= limSupY; i++)
+    for(int y = limInfY; y<= limSupY; y++)
     {
-        for(int j = limInfX; j<= limSupX; j++)
+        for(int x = limInfX; x<= limSupX; x++)
         {
-            mapa[i][j] = '.';
+            mapa[y][x] = '.';
         }
     }
 
@@ -481,29 +486,29 @@ void bifurcacionesCaminoPrincial (int filas, int cols, tPos posE, tPos posS, cha
 
 void cortarParedesParaMasCaminos(int filas, int cols, char** mapa)
 {
-    for (int i=1; i<filas-2; i++)
-        for (int j=1; j<cols-2; j++)
+    for (int y=1; y<filas-2; y++)
+        for (int x=1; x<cols-2; x++)
         {
             bool posibleCorteHorizontal, posibleCorteVertical;
 
             posibleCorteHorizontal = (
-                                         mapa[i-1][ j ] == '#' &&
-                                         mapa[ i ][j-1] == '.' &&
-                                         mapa[ i ][ j ] == '#' &&
-                                         mapa[ i ][j+1] == '.' &&
-                                         mapa[i+1][ j ] == '#'
+                                         mapa[y-1][ x ] == '#' &&
+                                         mapa[ y ][x-1] == '.' &&
+                                         mapa[ y ][ x ] == '#' &&
+                                         mapa[ y ][x+1] == '.' &&
+                                         mapa[y+1][ x ] == '#'
                                      );
 
             posibleCorteVertical = (
-                                       mapa[i-1][ j ] == '.' &&
-                                       mapa[ i ][j-1] == '#' && mapa[ i ][ j ] == '#' && mapa[ i ][j+1] == '#' &&
-                                       mapa[i+1][ j ] == '.'
+                                       mapa[y-1][ x ] == '.' &&
+                                       mapa[ y ][x-1] == '#' && mapa[ y ][ x ] == '#' && mapa[ y ][x+1] == '#' &&
+                                       mapa[y+1][ x ] == '.'
                                    );
 
             if ( (posibleCorteHorizontal || posibleCorteVertical)
                     && rand()%100<=PORCENTAJE_CORTE_PAREDES // porcentaje de cortes personalizable
                )
-                mapa[i][j] = '.';
+                mapa[y][x] = '.';
         }
 }
 
@@ -556,14 +561,14 @@ tPos posCaminoRandom (int columnas, int filas, char** mapa)
     if (!posDisp)
         return ret;
 
-    for(int i = 1; i<filas-2; i++)
+    for(int y = 1; y<filas-2; y++)
     {
-        for(int j = 1; j<columnas-2; j++)
+        for(int x = 1; x<columnas-2; x++)
         {
-            if (mapa[i][j] == '.')
+            if (mapa[y][x] == '.')
             {
-                posDisp[cantCam].x = j;
-                posDisp[cantCam].y = i;
+                posDisp[cantCam].x = x;
+                posDisp[cantCam].y = y;
                 cantCam++;
             }
         }
@@ -620,16 +625,16 @@ char itemRandom (int* fantasmas, int* premios, int* vidas)
 
 void insertarFantasmasEnMapaEntidades(int filas, int cols, char** mapa, Vector* fantasmas, Entidad*** mapaEntidades)
 {
-    for (int i=0; i<filas; i++)
+    for (int y=0; y<filas; y++)
     {
-        for (int j=0; j<cols; j++)
+        for (int x=0; x<cols; x++)
         {
-            if (mapa[i][j] == 'F')
+            if (mapa[y][x] == 'F')
             {
                 Entidad nuevoFantasma;
-                crearEntidad(&nuevoFantasma, j, i, 'F', TICKS_ENTRE_MOVS_FANTASMA_NORMAL);
+                crearEntidad(&nuevoFantasma, x, y, 'F', TICKS_ENTRE_MOVS_FANTASMA_NORMAL);
                 vectorInsertarAlFinal(fantasmas, &nuevoFantasma);
-                mapa[i][j] = '.';
+                mapa[y][x] = '.';
             }
         }
     }
@@ -647,20 +652,20 @@ void insertarFantasmasEnMapaEntidades(int filas, int cols, char** mapa, Vector* 
 void printMapa(int columnas, int filas, char** mapa)
 {
     printf("------------------------\n");
-    for(int i = 0; i<filas; i++)
+    for(int y = 0; y<filas; y++)
     {
-        for(int j = 0; j<columnas; j++)
-            printf("%c",mapa[i][j]);
+        for(int x = 0; x<columnas; x++)
+            printf("%c",mapa[y][x]);
         printf("\n");
     }
 }
 
 void printMapaEnTxt(int columnas, int filas, char** mapa, FILE** file)
 {
-    for(int i = 0; i<filas; i++)
+    for(int y = 0; y<filas; y++)
     {
-        for(int j = 0; j<columnas; j++)
-            fprintf((*file),"%c",mapa[i][j]);
+        for(int x = 0; x<columnas; x++)
+            fprintf((*file),"%c",mapa[y][x]);
         fprintf((*file),"\n");
     }
 }

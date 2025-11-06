@@ -6,7 +6,7 @@
 #include "../libs/conexion/transporte.h"
 
 // Recibe las peticiones, las encola para resolver y envia la respuesta.
-void recibirPeticiones(SOCKET socketCliente, tArbol* jugadores) {
+void recibirPeticiones(SOCKET socketCliente, tIndice* jugadores) {
 
     char peticion[BUFFER_TAM];
     char respuesta[BUFFER_TAM];
@@ -76,7 +76,7 @@ void recibirPeticiones(SOCKET socketCliente, tArbol* jugadores) {
 }
 
 // Procesa las peticiones recibidas. Devuelve el tamaño en bytes de la respuesta.
-unsigned procesarPeticion(const char *peticion, char *respuesta, tArbol* jugadores, tSecuencia* sec) {
+unsigned procesarPeticion(const char *peticion, char *respuesta, tIndice* jugadores, tSecuencia* sec) {
 
     char* actPet = (char*) peticion;
     unsigned char codOperacion;
@@ -97,7 +97,7 @@ unsigned procesarPeticion(const char *peticion, char *respuesta, tArbol* jugador
             break;
 
         case CREAR_PARTIDA:
-            tamRespuesta = crearPartida(actPet, respuesta);
+            tamRespuesta = crearPartida(actPet, respuesta, jugadores);
             break;
 
         case BUSCAR_JUGADOR:

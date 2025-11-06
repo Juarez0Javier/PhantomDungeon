@@ -14,30 +14,38 @@ void iniciarServidor() {
     struct sockaddr_in dirCliente;
     int tamDirCliente = sizeof(dirCliente);
 
-    tArbol jugadores;
-    int cod;
+    tIndice jugadores;
 
-    /*
-     * Si alguno de los archivos binarios para persistencia no existe, los crea a todos nuevamente.
-     * Aclaracion: Si uno no existe o al abrirlos, la lectura de alguno falla, regenera todos.
-     * No se puede regenerar uno solo, dejaria informacion inconsistente.
-    */
+    // Si alguno de los archivos binarios para persistencia no existe, lo crea nuevamente vacio.
     if (!verificarYRegenerarArchivos()) {
         printf("Error al regenerar los archivos.\n");
         system("pause");
         return;
     }
 
-    // Crear el arbol para el indice de jugadores. Si no se puede, no inicia la conexión.
-    crearArbol(&jugadores);
+    crearIndice(&jugadores);
 
-    cod = cargarArbolDeArchBin(&jugadores, RUTA_JUGADORES_IDX_DAT, sizeof(JugadorIdx), cmpJugadorIdx, NULL, NULL);
+    // Carga el indice de jugadores. Si no se puede, intenta generar. Si falla, no inicia la conexión.
+    if (cargarIndice(&jugadores, RUTA_JUGADORES_IDX_DAT, sizeof(JugadorIdx)) != OK) {
 
-    if (cod != OK) {
-        printf("Error al crear el arbol de jugadores.\n");
-        system("pause");
-        return;
+        generarIndice(
+            &jugadores,
+            RUTA_JUGADORES_DAT,
+            RUTA_JUGADORES_IDX_DAT,
+            sizeof(Jugador),
+            sizeof(JugadorIdx),
+            jugadorAIdx,
+            cmpJugadorIdx
+        );
+
+        if (cargarIndice(&jugadores, RUTA_JUGADORES_IDX_DAT, sizeof(JugadorIdx)) != OK) {
+            printf("Error al generar el indice de jugadores.\n");
+            system("pause");
+            return;
+        }
     }
+
+    mostrarIndice(&jugadores, imprimirJugadorIdx);
 
     if (iniciarWinSock() != 0) {
         printf("Error al inicializar Winsock.\n");
@@ -71,8 +79,12 @@ void iniciarServidor() {
     // Recepcion y manejo de peticiones.
     recibirPeticiones(socketCliente, &jugadores);
 
-    // Nota: No se sobreescribe el idx de jugadores ya que este ya se guarda ordenado. Ver funcion guardarJugador.
-    vaciarArbol(&jugadores);
+    if (guardarIndice(&jugadores, RUTA_JUGADORES_IDX_DAT, sizeof(JugadorIdx)) != OK) {
+        printf("Error al guardar los indices.\n");
+        system("pause");
+    }
+
+    vaciarIndice(&jugadores);
 
     printf("Conexion cerrada.\n");
 
@@ -112,26 +124,34 @@ SOCKET crearSocket() {
 
 bool verificarYRegenerarArchivos() {
 
-    bool todosOk =
-    existeArchivoBin(RUTA_JUGADORES_DAT) && 
-    existeArchivoBin(RUTA_JUGADORES_IDX_DAT) && 
-    existeArchivoBin(RUTA_PARTIDAS_DAT) && 
-    existeArchivoBin(RUTA_RANKINGS_DAT);
+    /*
+     * Tanto las partidas como los rankings dependen de los jugadores. Si el archivo de jugadores
+     * no existiese o estuviese corrupto, deberian reiniciarse tanto las partidas como los rankings.
+     * De la misma forma, no puede haber indices si ya no hay jugadores.
+    */
+    if (!existeArchivoBin(RUTA_JUGADORES_DAT)) {
+        if (crearArchivoBinVacio(RUTA_JUGADORES_DAT) == ERR_ARCHIVO)
+            return false;
 
-    if (todosOk)
-        return true;
+        if (crearArchivoBinVacio(RUTA_JUGADORES_IDX_DAT) == ERR_ARCHIVO)
+            return false;
 
-    if (crearArchivoBinVacio(RUTA_JUGADORES_DAT) == ERR_ARCHIVO)
-        return false;
+        if (crearArchivoBinVacio(RUTA_PARTIDAS_DAT) == ERR_ARCHIVO)
+            return false;
 
-    if (crearArchivoBinVacio(RUTA_JUGADORES_IDX_DAT) == ERR_ARCHIVO)
-        return false;
+        if (crearArchivoBinVacio(RUTA_RANKINGS_DAT) == ERR_ARCHIVO)
+            return false;
+    }
 
-    if (crearArchivoBinVacio(RUTA_PARTIDAS_DAT) == ERR_ARCHIVO)
-        return false;
-
-    if (crearArchivoBinVacio(RUTA_RANKINGS_DAT) == ERR_ARCHIVO)
-        return false;
+    if (!existeArchivoBin(RUTA_PARTIDAS_DAT)) {
+        if (crearArchivoBinVacio(RUTA_PARTIDAS_DAT) == ERR_ARCHIVO)
+            return false;
+    }
+    
+    if (!existeArchivoBin(RUTA_RANKINGS_DAT)) {
+        if (crearArchivoBinVacio(RUTA_RANKINGS_DAT) == ERR_ARCHIVO)
+            return false;
+    }
 
     return true;
 }

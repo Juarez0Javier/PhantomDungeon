@@ -5,6 +5,6 @@
 #include "./comun.h"
 #include "../peticiones.h"
 
-unsigned obtenerRankings(char* actPet, char* actRes, tArbol* jugadores, tSecuencia* secRank);
+unsigned obtenerRankings(char* actPet, char* actRes, tIndice* jugadores, tSecuencia* secRank);
 
 #endif // RANKING_H_INCLUDED

@@ -7,9 +7,9 @@
 #include <stdio.h>
 #include <string.h>
 
-int _guardarJugador(unsigned* id, const char* nombre, tArbol* jugadores);
+int _guardarJugador(unsigned* id, const char* nombre, tIndice* jugadores);
 
-unsigned crearJugador(char* actPet, char* respuesta, tArbol* jugadores) {
+unsigned crearJugador(char* actPet, char* respuesta, tIndice* jugadores) {
 
     unsigned char codRespuesta;
     unsigned id;
@@ -37,10 +37,10 @@ unsigned crearJugador(char* actPet, char* respuesta, tArbol* jugadores) {
 }
 
 // Busca al jugador segun su ID o nombre, depende del parametro opcion.
-unsigned buscarJugador(char* actPet, char* respuesta, tArbol* jugadores) {
+unsigned buscarJugador(char* actPet, char* respuesta, tIndice* jugadores) {
 
     FILE* archJugadores;
-    JugadorIdx jugIdx;
+    JugadorIdx idx;
     Jugador jugador;
     char* actRes = respuesta;
     unsigned char codRespuesta = OK, opcion;
@@ -55,9 +55,9 @@ unsigned buscarJugador(char* actPet, char* respuesta, tArbol* jugadores) {
 
     if (opcion == OPCION_ID) {
 
-        leerCampo(&jugIdx.id, sizeof(jugIdx.id), &actPet);
+        leerCampo(&idx.id, sizeof(idx.id), &actPet);
 
-        if (!buscarPorClaveArbol(jugadores, &jugIdx, sizeof(JugadorIdx), cmpJugadorIdx)) {
+        if (!buscarIndice(jugadores, &idx, sizeof(JugadorIdx), cmpJugadorIdx)) {
             codRespuesta = NO_ENCONTRADO;
             cargarCampo(&codRespuesta, sizeof(codRespuesta), &actRes);
             return actRes - respuesta;
@@ -65,10 +65,10 @@ unsigned buscarJugador(char* actPet, char* respuesta, tArbol* jugadores) {
 
     } else {
 
-        leerCampoStr(jugIdx.nombre, &actPet);
-        trimStr(jugIdx.nombre);
+        leerCampoStr(idx.nombre, &actPet);
+        trimStr(idx.nombre);
 
-        if (!buscarPorNoClaveArbol(jugadores, &jugIdx, sizeof(JugadorIdx), cmpNombreJugadorIdx)) {
+        if (!buscarNoClaveIndice(jugadores, &idx, sizeof(JugadorIdx), cmpNombreJugadorIdx)) {
             codRespuesta = NO_ENCONTRADO;
             cargarCampo(&codRespuesta, sizeof(codRespuesta), &actRes);
             return actRes - respuesta;
@@ -83,7 +83,7 @@ unsigned buscarJugador(char* actPet, char* respuesta, tArbol* jugadores) {
         return actRes - respuesta;
     }
 
-    fseek(archJugadores, jugIdx.pos * sizeof(Jugador), SEEK_SET);
+    fseek(archJugadores, idx.pos * sizeof(Jugador), SEEK_SET);
     fread(&jugador, sizeof(Jugador), 1, archJugadores);
     fclose(archJugadores);
 
@@ -94,9 +94,9 @@ unsigned buscarJugador(char* actPet, char* respuesta, tArbol* jugadores) {
 }
 
 // Crea y guarda a un jugador en la base de datos. Devuelve su ID si tiene exito.
-int _guardarJugador(unsigned* id, const char* nombre, tArbol* jugadores) {
+int _guardarJugador(unsigned* id, const char* nombre, tIndice* jugadores) {
 
-    FILE *archJugadores, *archJugadoresIdx, *archRankings;
+    FILE *archJugadores, *archRankings;
     Jugador jugador;
     JugadorIdx idx;
     Ranking ranking;
@@ -107,61 +107,54 @@ int _guardarJugador(unsigned* id, const char* nombre, tArbol* jugadores) {
 
     // Si encuentra otro jugador con el mismo nombre, devuelve duplicado.
     // Esto en una situacion normal no va a pasar porque el cliente es quien llama para verificarlo, pero no esta de mas.
-    if (buscarPorNoClaveArbol(jugadores, &idx, sizeof(JugadorIdx), cmpNombreJugadorIdx))
+    if (buscarNoClaveIndice(jugadores, &idx, sizeof(JugadorIdx), cmpNombreJugadorIdx))
         return DUPLICADO;
 
     // Procede a la apertura a los archivos.
-    archJugadores = fopen(RUTA_JUGADORES_DAT, "ab");
+    archJugadores = fopen(RUTA_JUGADORES_DAT, "r+b");
 
     if (!archJugadores)
         return ERR_ARCHIVO;
 
-    archJugadoresIdx = fopen(RUTA_JUGADORES_IDX_DAT, "r+b");
-
-    if (!archJugadoresIdx) {
-        fclose(archJugadores);
-        return ERR_ARCHIVO;
-    }
-
     archRankings = fopen(RUTA_RANKINGS_DAT, "ab");
 
-    if (!archJugadoresIdx) {
+    if (!archRankings) {
         fclose(archJugadores);
-        fclose(archJugadoresIdx);
         return ERR_ARCHIVO;
     }
 
     // Obtencion del ultimo id.
-    if (!buscarClaveMayorArbol(jugadores, &jugador, sizeof(Jugador)))
-        jugador.id = 0;
+    if (buscarClaveMayorIndice(jugadores, &idx, sizeof(JugadorIdx)))
+        strcpy(idx.nombre, nombre); // Copia nuevamente el nombre porque la busqueda trae el nombre del ultimo jugador.
+    else
+        idx.id = 0;
 
-    jugador.id++;
+    idx.id++;
 
     // Crea al jugador.
+    jugador.id = idx.id;
     strcpy(jugador.nombre, nombre);
 
     // Crea el indice.
-    fseek(archJugadoresIdx, 0, SEEK_END);
-    idx.id = jugador.id;
-    idx.pos = ftell(archJugadoresIdx) / sizeof(JugadorIdx);
+    fseek(archJugadores, 0l, SEEK_END);
+    idx.pos = ftell(archJugadores) / sizeof(Jugador);
 
     // Crea y guarda el ranking.
     ranking.idJugador = jugador.id;
     ranking.puntTotal = 0;
 
-    cod = ponerEnArbolI(jugadores, &idx, sizeof(JugadorIdx), cmpJugadorIdx, NULL, NULL);
+    // Crea el indice.
+    cod = ponerEnIndice(jugadores, &idx, sizeof(JugadorIdx), cmpJugadorIdx);
 
     if (cod == OK) {
         // Guarda todo en los archivos correspondientes.
         fwrite(&jugador, sizeof(Jugador), 1, archJugadores);
-        fwrite(&idx, sizeof(JugadorIdx), 1, archJugadoresIdx);
         fwrite(&ranking, sizeof(Ranking), 1, archRankings);
 
         *id = jugador.id;
     }
 
     fclose(archJugadores);
-    fclose(archJugadoresIdx);
     fclose(archRankings);
 
     return cod;

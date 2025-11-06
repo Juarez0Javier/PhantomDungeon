@@ -3,9 +3,9 @@
 #include "../../libs/conexion/transporte.h"
 #include <stdio.h>
 
-int _prepararRankings(unsigned* cantObt, tLista* rankings, tArbol* jugadores, unsigned limite, unsigned saltear);
+int _prepararRankings(unsigned* cantObt, tLista* rankings, tIndice* jugadores, unsigned limite, unsigned saltear);
 
-unsigned obtenerRankings(char* actPet, char* respuesta, tArbol* jugadores, tSecuencia* secRank) {
+unsigned obtenerRankings(char* actPet, char* respuesta, tIndice* jugadores, tSecuencia* secRank) {
 
     unsigned char codRespuesta;
     unsigned limite, saltear, cantObt;
@@ -34,10 +34,10 @@ unsigned obtenerRankings(char* actPet, char* respuesta, tArbol* jugadores, tSecu
 }
 
 // Ordena por puntaje los rankings y los junta con el nombre de su jugador. Incluye paginado.
-int _prepararRankings(unsigned* cantObt, tLista* rankings, tArbol* jugadores, unsigned limite, unsigned saltear) {
+int _prepararRankings(unsigned* cantObt, tLista* rankings, tIndice* jugadores, unsigned limite, unsigned saltear) {
 
     FILE* archRankings = fopen(RUTA_RANKINGS_DAT, "rb");
-    JugadorIdx jugIdx;
+    JugadorIdx idx;
     Ranking rank;
     RankingCompleto rankComp;
     unsigned obt = 0;
@@ -54,12 +54,12 @@ int _prepararRankings(unsigned* cantObt, tLista* rankings, tArbol* jugadores, un
     while (cod == OK && (limite == 0 || obt < limite) && !feof(archRankings)) {
 
         // Junta el ranking con el nombre de su jugador.
-        jugIdx.id = rank.idJugador;
+        idx.id = rank.idJugador;
 
         // Si lo encuentra, copia al vector con los rankings completos.
-        if (buscarPorClaveArbol(jugadores, &jugIdx, sizeof(JugadorIdx), cmpJugadorIdx)) {
-            rankComp.idJugador = jugIdx.id;
-            strcpy(rankComp.nombre, jugIdx.nombre);
+        if (buscarIndice(jugadores, &idx, sizeof(JugadorIdx), cmpJugadorIdx)) {
+            rankComp.idJugador = idx.id;
+            strcpy(rankComp.nombre, idx.nombre);
             rankComp.puntTotal = rank.puntTotal;
 
             cod = ponerEnListaAlFinal(rankings, &rankComp, sizeof(rankComp)) ? OK : SIN_MEM;
@@ -70,17 +70,18 @@ int _prepararRankings(unsigned* cantObt, tLista* rankings, tArbol* jugadores, un
     }
 
     /*
-     * Nota referida a lo que se explica en el archivo de conexion:
+     * Nota referida a lo que se explica en el archivo de peticiones:
        Si los elementos de la secuencia fueran una cola, habria que, luego hacer todo esta carga ordenada en la lista
        descargar la misma para cargar una cola.
     */
 
     if (cod != OK) {
         vaciarLista(rankings);
-        *cantObt = 0;
-    } else
-        *cantObt = obt;
-        
+        obt = 0;
+    }
+      
+    *cantObt = obt;
+
     fclose(archRankings);
     return cod;
 }

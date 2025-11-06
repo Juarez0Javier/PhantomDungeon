@@ -4,10 +4,10 @@
 #include "../../libs/conexion/modelos.h"
 #include "../../libs/conexion/transporte.h"
 
-int _guardarPartida(unsigned* id, unsigned idJugador, unsigned puntuacion, unsigned cMovs);
+int _guardarPartida(unsigned* id, unsigned idJugador, unsigned puntuacion, unsigned cMovs, tIndice* jugadores);
 void _actualizarRankings(FILE* archRankings, unsigned idJugador, unsigned puntuacion);
 
-unsigned crearPartida(char* actPet, char* respuesta) {
+unsigned crearPartida(char* actPet, char* respuesta, tIndice* jugadores) {
 
     unsigned char codRespuesta;
     unsigned id, idJugador, puntuacion, cMovs;
@@ -17,18 +17,28 @@ unsigned crearPartida(char* actPet, char* respuesta) {
     leerCampo(&puntuacion, sizeof(puntuacion), &actPet);
     leerCampo(&cMovs, sizeof(cMovs), &actPet);
 
-    codRespuesta = _guardarPartida(&id, idJugador, puntuacion, cMovs);
+    codRespuesta = _guardarPartida(&id, idJugador, puntuacion, cMovs, jugadores);
 
     cargarCampo(&codRespuesta, sizeof(codRespuesta), &actRes);
-    cargarCampo(&id, sizeof(id), &actRes);
+
+    if (codRespuesta == OK)
+        cargarCampo(&id, sizeof(id), &actRes);
 
     return actRes - respuesta;
 }
 
-int _guardarPartida(unsigned* id, unsigned idJugador, unsigned puntuacion, unsigned cMovs) {
+int _guardarPartida(unsigned* id, unsigned idJugador, unsigned puntuacion, unsigned cMovs, tIndice* jugadores) {
     FILE *archPartidas, *archRankings;
     RegistroPartida partida;
+    JugadorIdx idx;
     unsigned ultimoId = 0;
+
+    idx.id = idJugador;
+
+    // Si no encuentra al jugador del ID, devuelve no encontrado. Mantiene una especie de integridad referencial.
+    // Esto en una situacion normal no va a pasar porque desde el cliente se usa al id del jugador obtenido.
+    if (!buscarIndice(jugadores, &idx, sizeof(JugadorIdx), cmpJugadorIdx))
+        return NO_ENCONTRADO;
 
     archPartidas = fopen(RUTA_PARTIDAS_DAT, "r+b");
 

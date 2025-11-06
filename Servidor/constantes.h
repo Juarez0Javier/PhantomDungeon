@@ -6,6 +6,7 @@
 #include "../libs/Comun/conexion.h"
 #include "../libs/Cola/Cola.h"
 #include "../libs/Arbol/Arbol.h"
+#include "../libs/Indice/Indice.h"
 #include "../libs/Vector/Vector.h"
 #include "../libs/Lista/Lista.h"
 

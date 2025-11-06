@@ -8,7 +8,7 @@ typedef struct {
     tLista elementos;
 } tSecuencia;
 
-void recibirPeticiones(SOCKET socketCliente, tArbol* jugadores);
-unsigned procesarPeticion(const char *peticion, char *respuesta, tArbol* jugadores, tSecuencia* sec);
+void recibirPeticiones(SOCKET socketCliente, tIndice* jugadores);
+unsigned procesarPeticion(const char *peticion, char *respuesta, tIndice* jugadores, tSecuencia* sec);
 
 #endif // PETICIONES_H_INCLUDED

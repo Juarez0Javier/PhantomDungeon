@@ -46,9 +46,20 @@ void imprimirJugador(const void* elem) {
     printf("%d\t%s\n", jugador -> id, jugador -> nombre);
 }
 
-void imprimirJugadorIdx(void* elem) {
+void imprimirJugadorIdx(void* elem, void* extra) {
     JugadorIdx* jugador = (JugadorIdx*) elem;
     printf("%d\t%s\t%d\n", jugador -> id, jugador -> nombre, jugador -> pos);
+}
+
+bool jugadorAIdx(void* idx, const void* reg, int pos) {
+    JugadorIdx* jIdx = (JugadorIdx*) idx;
+    Jugador* jug = (Jugador*) reg;
+
+    jIdx -> id = jug -> id;
+    strcpy(jIdx -> nombre, jug -> nombre);
+    jIdx -> pos = pos;
+
+    return true;
 }
 
 int cmpJugadorIdx(const void* e1, const void* e2) {

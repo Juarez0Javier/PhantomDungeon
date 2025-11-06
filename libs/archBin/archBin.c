@@ -2,13 +2,26 @@
 #include <string.h>
 #include "./archBin.h"
 
+
+bool existeArchivoBin(const char* nomArch) {
+    FILE* arch = fopen(nomArch, "rb");
+
+    if (!arch)
+        return false;
+
+    fclose(arch);
+    return true;
+}
+
 int crearArchivoBinVacio(const char* nomArch) {
+
     FILE* arch = fopen(nomArch, "wb");
 
     if (!arch)
         return ERR_ARCHIVO;
 
     fclose(arch);
+
     return OK;
 }
 

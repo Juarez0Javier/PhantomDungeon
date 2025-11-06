@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "../Comun/comun.h"
 
+bool existeArchivoBin(const char* nomArch);
 int crearArchivoBinVacio(const char* nomArch);
 void mostrarArchivoBin(FILE* arch, unsigned tamReg, Imp imp);
 int buscarEnArchivoBin(FILE* arch, void* busq, unsigned tamReg, Cmp cmp);

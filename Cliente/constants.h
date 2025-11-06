@@ -43,7 +43,7 @@
 #define CONFIG_MAX_NUM_PREM 3
 #define CONFIG_MAX_VIDAS_EXTRA 3
 // Configuracion de video
-#define FPS 20
+#define FPS 60
 #define DELAY_DE_FRAMES 1000/FPS
 #define COOLDOWN_MOV_JUGADOR 100 // aprox ms
 

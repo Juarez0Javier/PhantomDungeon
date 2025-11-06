@@ -12,4 +12,7 @@ SOCKET crearSocket();
 // Ejecuta el bucle principal del servidor
 void iniciarServidor();
 
+// Si alguno de los archivos binarios para persistencia no existe, los crea a todos.
+bool verificarYRegenerarArchivos();
+
 #endif // CONEXION_H_INCLUDED

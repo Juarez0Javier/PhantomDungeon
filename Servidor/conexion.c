@@ -17,7 +17,18 @@ void iniciarServidor() {
     tArbol jugadores;
     int cod;
 
-    // Lo primero que se hace es crear el arbol para el indice de jugadores. Si no se puede, no inicia la conexión.
+    /*
+     * Si alguno de los archivos binarios para persistencia no existe, los crea a todos nuevamente.
+     * Aclaracion: Si uno no existe o al abrirlos, la lectura de alguno falla, regenera todos.
+     * No se puede regenerar uno solo, dejaria informacion inconsistente.
+    */
+    if (!verificarYRegenerarArchivos()) {
+        printf("Error al regenerar los archivos.\n");
+        system("pause");
+        return;
+    }
+
+    // Crear el arbol para el indice de jugadores. Si no se puede, no inicia la conexión.
     crearArbol(&jugadores);
 
     cod = cargarArbolDeArchBin(&jugadores, RUTA_JUGADORES_IDX_DAT, sizeof(JugadorIdx), cmpJugadorIdx, NULL, NULL);
@@ -97,4 +108,30 @@ SOCKET crearSocket() {
     }
 
     return s;
+}
+
+bool verificarYRegenerarArchivos() {
+
+    bool todosOk =
+    existeArchivoBin(RUTA_JUGADORES_DAT) && 
+    existeArchivoBin(RUTA_JUGADORES_IDX_DAT) && 
+    existeArchivoBin(RUTA_PARTIDAS_DAT) && 
+    existeArchivoBin(RUTA_RANKINGS_DAT);
+
+    if (todosOk)
+        return true;
+
+    if (crearArchivoBinVacio(RUTA_JUGADORES_DAT) == ERR_ARCHIVO)
+        return false;
+
+    if (crearArchivoBinVacio(RUTA_JUGADORES_IDX_DAT) == ERR_ARCHIVO)
+        return false;
+
+    if (crearArchivoBinVacio(RUTA_PARTIDAS_DAT) == ERR_ARCHIVO)
+        return false;
+
+    if (crearArchivoBinVacio(RUTA_RANKINGS_DAT) == ERR_ARCHIVO)
+        return false;
+
+    return true;
 }

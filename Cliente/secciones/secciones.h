@@ -16,8 +16,6 @@
 #include <windows.h>
 #endif // _WIN32
 
-//#include "otrasFunciones.h"
-
 typedef struct {
     void (*init)(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
     void (*handler)(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex, SDL_Event* event);

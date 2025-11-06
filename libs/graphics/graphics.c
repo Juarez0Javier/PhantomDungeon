@@ -1,5 +1,3 @@
-// aclarar espiritu
-
 #include "graphics.h"
 
 // Initialize SDL and calls the react function. It will has as arguments the renderer, void* gameData for any info of the game, GHP_TexturesData*, and a draw function
@@ -82,7 +80,7 @@ GHP_Texture GHP_newTexture(SDL_Renderer* renderer, const char* path, int offsetX
     return (GHP_Texture){sdl_tex, offsetX, offsetY, width, height};
 }
 
-// Same as nweTexture, absolute positions int the asset instead of offsets
+// Same as newTexture, absolute positions int the asset instead of offsets
 GHP_Texture GHP_newTextureAbs(SDL_Renderer* renderer, const char* path, int initX, int initY, int endX, int endY) {
     // Initialize a texture. Absolute position of the asset
     return GHP_newTexture(renderer, path, initX, initY, endX-initX, endY-initY);
@@ -274,7 +272,7 @@ bool GHP_clickInMesh(int x, int y, GHP_Mesh* mesh) {
 }
 
 // you give the coords and return the position
-void GHP_coordsToPos(GHP_Mesh* mesh, int x, int y, int* pos) { // maybe switch the name to posToCoords
+void GHP_coordsToPos(GHP_Mesh* mesh, int x, int y, int* pos) {
     *pos = (y-mesh->offsetY) / mesh->txtr->height;
     *(pos+1) = (x-mesh->offsetX) / mesh->txtr->width;
 }

@@ -51,7 +51,7 @@ bool validarConfig(ConfigData* configs) {
     return !(
         configs->filas < MIN_FILAS || configs->filas > MAX_FILAS
         || configs->columnas < MIN_COLUMNAS || configs->columnas > MAX_COLUMNAS
-        || configs->maximo_numero_fantasmas < MIN_NUM_FANTASMAS || configs->maximo_numero_fantasmas > MAX_NUM_FANTASMAS // kinda weird, ask. TODO
+        || configs->maximo_numero_fantasmas < MIN_NUM_FANTASMAS || configs->maximo_numero_fantasmas > MAX_NUM_FANTASMAS
         || configs->maximo_numero_premios < MIN_NUM_PREMIOS || configs->maximo_numero_premios > MAX_NUM_PREMIOS
         || configs->maximo_vidas_extra < MIN_VIDAS_EXTRA || configs->maximo_vidas_extra > MAX_VIDAS_EXTRA
         || configs->vidas_inicio < MIN_VIDAS_INICIO || configs->vidas_inicio > MAX_VIDAS_INICIO

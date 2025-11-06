@@ -190,7 +190,6 @@ void resolverMovimientos (Partida* partida, Mapa* mapa, tCola* movs, int* seccio
     if (mov.ent == &partida -> jugador) {
         // Añadir movimiento a registro de movimientos
 
-        // Por ahora podemos dejarlo as�, las unicas entidades aparte del jugador, son los fantasmas.
         entidadCol = mapa -> entidades[mov.y][mov.x];
 
         if (entidadCol) {
@@ -206,7 +205,7 @@ void resolverMovimientos (Partida* partida, Mapa* mapa, tCola* movs, int* seccio
 
             case PREMIO:
                 partida -> premiosObt++;
-                partida -> puntuacion += 100; // Asumiendo que el premio da 100 pts.
+                partida -> puntuacion += 100;
                 mapa -> data[mov.y][mov.x] = CAMINO;
                 break;
 

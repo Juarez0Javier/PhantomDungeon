@@ -41,15 +41,11 @@ int generarMapaRandom(ConfigData* configData, Partida* partida, char nombreArch[
 
     cortarParedesParaMasCaminos(filas, columnas, mapa);
 
-    //bifurcacionesCaminoPrincial(filas,columnas,posE,posS,mapa);
-
     insertarEntidadesEnMapa(posE, fantasmas, premios, vidas, filas, columnas, mapa, partida);
 
     printMapaEnTxt(columnas,filas,mapa,&archTxt);
 
     //printMapa(columnas,filas,mapa);
-
-    //exit(0);
 
     insertarFantasmasEnMapaEntidades(filas, columnas, mapa, &partida->fantasmas, partida->mapa.entidades);
 
@@ -210,8 +206,6 @@ tPos dirRandom (int cardBloq[4])
     int sel, vecSel[4] = {0,0,0,0};
     int vecTam = 0;
 
-    //printf("Proc\n");
-
     tPos ret;
 
     for(int i = 0; i < 4; i++)
@@ -227,8 +221,6 @@ tPos dirRandom (int cardBloq[4])
 
     ret.x = cardaVector2(sel).x;
     ret.y = cardaVector2(sel).y;
-
-    //printf("X: %d, Y: %d\n",ret.x,ret.y);
 
     return ret;
 }
@@ -288,9 +280,6 @@ void generarGaleria (int galLong, int galAlt, tPos posE, int filas, int cols, ch
     if (limSupY > filas - 2)
         ajusteY = filas - 2 - limSupY;
 
-    //printf("X Sup: %d - X Inf: %d - Ajuste X: %d\n",limSupX,limInfX,ajusteX);
-    //printf("Y Sup: %d - Y Inf: %d - Ajuste Y: %d\n",limSupY,limInfY,ajusteY);
-
     limInfX += ajusteX;
     limSupX += ajusteX;
 
@@ -306,182 +295,6 @@ void generarGaleria (int galLong, int galAlt, tPos posE, int filas, int cols, ch
     }
 
     return;
-}
-
-void bifurcacionesCaminoPrincial (int filas, int cols, tPos posE, tPos posS, char** mapa)
-{
-    //Algoritmo BFS
-    // Reinicia la matriz de visita (todos como no visitados)
-
-    tCola colaBFS;
-
-    int ** mat_visitado = (int**)crearMatriz(filas, cols, sizeof(int));
-    int ** mat_padreX  = (int**)crearMatriz(filas, cols, sizeof(int));
-    int ** mat_padreY  = (int**)crearMatriz(filas, cols, sizeof(int));
-
-    int y, x, d;
-
-    int dx[8] = { 0, 0, 1, -1};
-    int dy[8] = {-1, 1, 0, 0};
-
-    int metaX, metaY;
-    bool encontrado;
-
-    tPos m_actual;
-    tPos m_nueva;
-    int nx, ny;
-
-    int r_actualX, r_actualY;
-    int anteriorX, anteriorY;
-    bool retrocediendo;
-
-    crearCola(&colaBFS);
-
-    y = 0;
-    while (y < filas)
-    {
-        x = 0;
-        while (x < cols)
-        {
-            ((int*)mat_visitado[y])[x] = false;
-            x++;
-        }
-        y++;
-    }
-
-    //Obteniendo el primer casillero de E
-    if (posE.x == 0)
-        posE.x++;
-    if (posE.x == cols - 1)
-        posE.x--;
-    if (posE.y == 0)
-        posE.y++;
-    if (posE.y == filas -1)
-        posE.y--;
-
-    //Obteniendo el primer casillero de S
-
-    if (posS.x == 0)
-        posS.x++;
-    if (posS.x == cols - 1)
-        posS.x--;
-    if (posS.y == 0)
-        posS.y++;
-    if (posS.y == filas - 1)
-        posS.y--;
-
-    printf("E en X: %d - E en Y: %d \n",posE.x,posE.y);
-    printf("S en X: %d - S en Y: %d \n",posS.x,posS.y);
-
-    m_actual.x = posE.x;
-    m_actual.y = posE.x;
-
-    ponerEnCola(&colaBFS, &m_actual, sizeof(tPos));
-
-    ((int*)mat_visitado[posE.y])[posE.x] = true;
-    ((int*)mat_padreX[posE.y])[posE.x] = posE.x;
-    ((int*)mat_padreY[posE.y])[posE.x] = posE.y;
-
-    metaX = posS.x;
-    metaY = posS.y;
-    encontrado = false;
-
-
-    //BFS: contin�a mientras haya nodos en la cola y no se haya encontrado la meta.
-    while (!colaVacia(&colaBFS) && !encontrado)
-    {
-
-        if (sacarDeCola(&colaBFS, &m_actual, sizeof(tPos)))
-        {
-            d = 0;
-            while (d < 4)   // 4 direcciones
-            {
-
-                nx = m_actual.x + dx[d];
-                ny = m_actual.y + dy[d];
-                if (nx >= 0 && nx < cols && ny >= 0 && ny < filas)
-                {
-
-                    if ((((int*)mat_visitado[ny])[nx] == false) && (mapa[ny][nx] !='#') && !encontrado)
-                    {
-
-                        // Marca como visitado, guarda padre y encola
-                        ((int*)mat_visitado[ny])[nx] = true;
-                        ((int*)mat_padreX[ny])[nx] = m_actual.x;
-                        ((int*)mat_padreY[ny])[nx] = m_actual.y;
-
-                        m_nueva.x = nx;
-                        m_nueva.y = ny;
-                        ponerEnCola(&colaBFS, &m_nueva, sizeof(tPos));
-
-                        // Si llega al jugador
-                        if (nx == metaX && ny == metaY)
-                        {
-                            encontrado = true;
-                        }
-                    }
-                }
-                d++;
-            }
-        }
-    }
-
-    //Reconstrucci�n del camino
-    if (encontrado)
-    {
-
-        r_actualX = metaX;
-        r_actualY = metaY;
-
-        retrocediendo = true;
-        anteriorX = posE.x;
-        anteriorY = posE.y;
-
-        // El bucle busca el nodo 'anteriorX, anteriorY'
-        while (retrocediendo)
-        {/*
-            bool posibleCorteHorizontal, posibleCorteVertical;
-
-            posibleCorteHorizontal = (
-                                         mapa[r_actualY-1][ r_actualX ] == '#' &&
-                                         mapa[r_actualY][r_actualX-1] == '.' && mapa[ r_actualY ][ r_actualX ] == '#' && mapa[ r_actualY ][r_actualX+1] == '.' &&
-                                         mapa[r_actualY+1][ r_actualX ] == '#'
-                                     );
-
-            posibleCorteVertical = (
-                                       mapa[r_actualY-1][ r_actualX ] == '.' &&
-                                       mapa[r_actualY][r_actualX-1] == '#' && mapa[ r_actualY ][ r_actualX ] == '#' && mapa[ r_actualY ][r_actualX+1] == '#' &&
-                                       mapa[r_actualY+1][r_actualX ] == '.'
-                                   );
-
-            if ( (posibleCorteHorizontal || posibleCorteVertical)
-                    && rand()%100<=PORCENTAJE_CORTE_PAREDES // porcentaje de cortes personalizable
-               )
-                mapa[r_actualY][r_actualX] = '.';*/
-
-            printf("X Vistando: %d - Y Visitado: %d \n",r_actualX,r_actualY);
-
-            if (!(r_actualX == posE.x && r_actualY == posE.y))
-            {
-
-                anteriorX = r_actualX;
-                anteriorY = r_actualY;
-                r_actualX = ((int*)mat_padreX[anteriorY])[anteriorX];
-                r_actualY = ((int*)mat_padreY[anteriorY])[anteriorX];
-
-                // si el padre al que saltamos es el fantasma
-                if (r_actualX == posE.x && r_actualY == posE.y)
-                {
-                    retrocediendo = false;
-                }
-
-            }
-            else
-            {
-                retrocediendo = false;
-            }
-        }
-    }
 }
 
 void cortarParedesParaMasCaminos(int filas, int cols, char** mapa)
@@ -550,9 +363,9 @@ int insertarEntidadesEnMapa(tPos posE, int fantasmas, int premios, int vidas, in
 
 tPos posCaminoRandom (int columnas, int filas, char** mapa)
 {
-    // es enrevezada, pero garantiza llegar siempre a alguna posicion (O^2)
-    // (agarrando posiciones random y si no son camino volviendo a randomizar
-    // no garantiza un tiempo minimo)
+    // garantiza llegar siempre a alguna posicion (O^2)
+    // (agarrando posiciones random y si no son camino
+    // volviendo a randomizar no garantiza un tiempo minimo
     tPos *posDisp, ret = {-1,-1};
     int cantCam = 0, sel;
 

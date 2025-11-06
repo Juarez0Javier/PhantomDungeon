@@ -32,10 +32,9 @@ int iniciarTexData(GHP_TexturesData* tex_data, SDL_Renderer* renderer, Partida* 
     // set BG
     if (!GHP_setBG(renderer, tex_data, RUTA_FONDO)) {
         printf("\nNo se pudo cargar el fondo.");
-        //return ERR_ARCHIVO; // u can play without bg
+        //return ERR_ARCHIVO; // Se puede llegar a jugar sin el fondo cargado
     }
 
-    // here setted in 0 in case there is an error before initializing them
     tex_data->buttons_loaded = 0;
     tex_data->texts_loaded = 0;
 
@@ -74,7 +73,6 @@ int iniciarTexData(GHP_TexturesData* tex_data, SDL_Renderer* renderer, Partida* 
 
     // set mesh
     int offset_to_centerX = (WIDTH - partida->mapa.cols * stdDimPix[i]) / 2;
-    //int offset_to_centerY = (HEIGHT - partida->mapa.filas * stdDimPix[i]) / 2;
     tex_data->active_mesh = (GHP_Mesh){offset_to_centerX, TAM_HEADER_PARTIDA, &(tex_data->textures[0]), partida->mapa.filas, partida->mapa.cols};
 
     tex_data->buttons = malloc(sizeof(GHP_Button)*AMMOUNT_BUTTONS);
@@ -110,7 +108,7 @@ int iniciarBotones(SDL_Renderer* renderer, GHP_TexturesData* texData) {
     for(int i=0; i<AMMOUNT_BUTTONS; i++) {
         if (! (texData->buttons + i)->tex ) {
             printf("\nError loading the buttons. Button %d.", i);
-            return TEX_ERR; // could be file
+            return TEX_ERR;
         }
     }
 

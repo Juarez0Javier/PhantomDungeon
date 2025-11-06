@@ -83,7 +83,6 @@ int cargarMapaDeArchivoNoSeguro(Mapa* mapa, Entidad* jugador, Vector* entidades,
                 Entidad nuevoFantasma;
                 switch (bufferLinea[j]) {
                     case 'F':
-                        //Entidad nuevoFantasma = {entidades->tam, 'F', j, i}; raises error idk
                         nuevoFantasma.num = entidades->tam;
                         nuevoFantasma.tipo = 'F';
                         nuevoFantasma.x = j;
@@ -130,13 +129,12 @@ bool cargarMapaDeArchivo (Mapa* mapa, Entidad* jugador, Vector* fantasmas, const
             switch (casilla) {
                 case ENTRADA:
                     crearEntidad(jugador, j, i, JUGADOR, COOLDOWN_MOV_JUGADOR);
-                    mapa -> entidades[i][j] = jugador; // cuidado: no cuida que sea indexable
+                    mapa -> entidades[i][j] = jugador;
                     break;
 
                 case FANTASMA:
 
                     // Crea diferentes cooldowns, entre 500 y 1000ms.
-                    // Esto podriamos dejarlo afuera del while, asignado un unico cooldown a cada fantasma si trabajamos por dificultades.
                     ticksEntreMovs = (rand() % 500) + 500;
                     crearEntidad(&fantasma, j, i, FANTASMA, ticksEntreMovs);
 
@@ -178,7 +176,7 @@ int cambioSaltoLineaPorFinCadena(char* cadena) {
     return OK;
 }
 
-int moverEntidad(Entidad* entidad, Mapa* mapa, char direccion) { // it is not case sensitive (no need?)
+int moverEntidad(Entidad* entidad, Mapa* mapa, char direccion) {
     int difX= direccion=='d' ? 1 : direccion=='a' ? -1 : 0;
     int difY= direccion=='s' ? 1 : direccion=='w' ? -1 : 0;
     if (
@@ -214,7 +212,6 @@ void reestablecerPosInicial (Entidad* e, Mapa* mapa) {
 
 
 
-// es fea, lo se, prometo optimizarla despues
 void actualizarMapaRender(SDL_Renderer* renderer, Mapa* mapa, GHP_TexturesData* tex, GHP_Mesh mesh) {
     GHP_Texture pared = tex->textures[0];
     GHP_Texture espacio = tex->textures[1];

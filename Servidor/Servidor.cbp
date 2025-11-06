@@ -45,6 +45,10 @@
 		<Unit filename="../libs/Comun/comun.h" />
 		<Unit filename="../libs/Comun/conexion.h" />
 		<Unit filename="../libs/Comun/nodo.h" />
+		<Unit filename="../libs/Indice/Indice.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libs/Indice/Indice.h" />
 		<Unit filename="../libs/Lista/Lista.c">
 			<Option compilerVar="CC" />
 		</Unit>

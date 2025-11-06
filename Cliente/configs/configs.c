@@ -68,7 +68,7 @@ void nullConfig(ConfigData* configs) {
 }
 
 bool resetConfig() {
-    FILE* archConfig = fopen("config.txt", "wt");
+    FILE* archConfig = fopen(RUTA_CONFIGS, "wt");
     if (!archConfig)
         return false;
     fprintf(archConfig, "filas: %d\ncolumnas: %d\nvidas_inicio: %d\nmaximo_numero_fantasmas: %d\nmaximo_numero_premios: %d\nmaximo_vidas_extra: %d\n",

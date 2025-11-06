@@ -1,10 +1,11 @@
 #include "secciones.h"
 #include "../conexion/api.h"
+#include "../conexion/conexion.h"
 #include "../../libs/string/string.h"
 #include <ctype.h>
 
 void _limpiarTextosGenerales(int ini, int fin, SDL_Renderer* renderer, GHP_TexturesData* tex);
-bool _procesarNombre(tContextoGlobal* cGlobal, const char* nombre);
+int _procesarNombre(tContextoGlobal* cGlobal, const char* nombre);
 void _cargarTexsConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
 void _mostrarRankCompletoSDL(void* elem, void* extra);
 void _obtenerYMostrarRankings(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex);
@@ -90,6 +91,7 @@ void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_
 
     unsigned tamNombre;
     char* nombre = tex->texts[TEXT_ENTRADANOMBREJUGADOR].text;
+    int cod;
 
     handleButtonsClick(buttons, 2, &cGlobal->partida, &cGlobal->seccion, event);
 
@@ -118,7 +120,7 @@ void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_
     if (event->type == SDL_TEXTINPUT) {
 
         // Si no se excede el limite de tamanio del texto, lo escribe en el input.
-        if (tamNombre <= TAM_NOMBRE) {
+        if (tamNombre < TAM_NOMBRE) {
             strcat(nombre, event->text.text);
             GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREJUGADOR, TAM_FUENTE_CHICO, BLACK_COLOR);
             tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text[0] = '\0';
@@ -161,11 +163,24 @@ void handlerIngresoNombre(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_
 
         trimStr(nombre);
 
+        cod = _procesarNombre(cGlobal, nombre);
+
         // Si falla en encontrar o crear el nombre, se queda en la seccion de ingreso de nombre e informa el error.
-        if (!_procesarNombre(cGlobal, nombre)) {
-            cGlobal -> socket = INVALID_SOCKET;
-            strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Inicio de sesion y guardado de partidas no disponible.");
-            GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, TAM_FUENTE_CHICO, RED_COLOR);
+        if (cod != OK) {
+
+            // No deberia pasar un error de formato, pero no esta de mas la validacion.
+            if (cod == ERR_FORMATO) {
+                strcpy(tex->texts[TEXT_ERR_NOMBRE_JUGADOR].text, "Longitud o formato de nombre incorrectos.");
+                GHP_updateTextTexture(renderer, tex, TEXT_ERR_NOMBRE_JUGADOR, TAM_FUENTE_CHICO, RED_COLOR);
+            } 
+            // Ante cualquier otro error, de archivo o de conexion, cierra la conexion e invalida el socket.
+            else {
+                cerrarConexion(cGlobal -> socket);
+                cGlobal -> socket = INVALID_SOCKET;
+                strcpy(tex->texts[TEXT_ENTRADANOMBREMENSAJE].text, "Inicio de sesion y guardado de partidas no disponible.");
+                GHP_updateTextTexture(renderer, tex, TEXT_ENTRADANOMBREMENSAJE, TAM_FUENTE_CHICO, RED_COLOR);
+            }
+
             cGlobal -> seccion = SECCION_INGRESO_NOMBRE;
             return;
         }
@@ -663,7 +678,7 @@ void _mostrarFinPartida(const char* msj, tContextoGlobal* cGlobal, SDL_Renderer*
     _limpiarTextosGenerales(INICIO_TEXTOS_PARTIDAS, CANT_TEXTOS_PARTIDAS, renderer, tex);
 }
 
-bool _procesarNombre(tContextoGlobal* cGlobal, const char* nombre) {
+int _procesarNombre(tContextoGlobal* cGlobal, const char* nombre) {
 
     int cod;
     Jugador jug;
@@ -675,7 +690,7 @@ bool _procesarNombre(tContextoGlobal* cGlobal, const char* nombre) {
     else
         cGlobal -> idJugador = jug.id;
 
-    return cod == OK;
+    return cod;
 }
 
 void _cargarTexsConfigs(tContextoGlobal* cGlobal, SDL_Renderer* renderer, GHP_TexturesData* tex) {

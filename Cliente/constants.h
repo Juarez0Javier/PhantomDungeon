@@ -47,15 +47,9 @@
 #define DELAY_DE_FRAMES 1000/FPS
 #define COOLDOWN_MOV_JUGADOR 100 // aprox ms
 
-
 // Rutas
-// Para cuando se ejecuta de codeblocks.
-// #define RUTA_LABERINTO_PRESET "./laberintos/laberinto.txt"
-// #define RUTA_CONFIGS "./config.txt"
-// #define RUTA_FONDO "./src/img/background.png"
-// #define RUTA_IMG "./src/img/"
-// #define RUTA_BOTONES "./src/img/botones.png"
-// #define RUTA_FUENTE "./fnt/Consolas-Regular.ttf"
+#define COMPILACION_DESDE_BIN true
+#if COMPILACION_DESDE_BIN
 
 // Para cuando se ejecuta del binario.
 #define RUTA_LABERINTO_PRESET "../../laberintos/laberinto.txt"
@@ -64,6 +58,18 @@
 #define RUTA_IMG "../../src/img/"
 #define RUTA_BOTONES "../../src/img/botones.png"
 #define RUTA_FUENTE "../../fnt/Consolas-Regular.ttf"
+
+#else
+
+// Para cuando se ejecuta de codeblocks.
+#define RUTA_LABERINTO_PRESET "./laberintos/laberinto.txt"
+#define RUTA_CONFIGS "./config.txt"
+#define RUTA_FONDO "./src/img/background.png"
+#define RUTA_IMG "./src/img/"
+#define RUTA_BOTONES "./src/img/botones.png"
+#define RUTA_FUENTE "./fnt/Consolas-Regular.ttf"
+
+#endif
 
 // Secciones de juego
 #define SECCION_MENU 0

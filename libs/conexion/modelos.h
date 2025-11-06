@@ -1,7 +1,7 @@
 #ifndef MODELOS_H_INCLUDED
 #define MODELOS_H_INCLUDED
 
-#define TAM_NOMBRE 50
+#define TAM_NOMBRE 25
 
 // Se le pueden aniadir mas campos, pero en nuestro caso, lo dejamos sencillo.
 typedef struct {

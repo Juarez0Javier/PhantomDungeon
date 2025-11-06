@@ -20,8 +20,11 @@ unsigned crearJugador(char* actPet, char* respuesta, tArbol* jugadores) {
     leerCampoStr(nombre, &actPet);
 
     // Validacion de campos.
-    if (!validarCampoStr(nombre, TAM_NOMBRE))
-        return ERR_FORMATO;
+    if (!validarCampoStr(nombre, TAM_NOMBRE)) {
+        codRespuesta = ERR_FORMATO;
+        cargarCampo(&codRespuesta, sizeof(codRespuesta), &actRes);
+        return actRes - respuesta;
+    }
 
     trimStr(nombre);
 
@@ -46,8 +49,7 @@ unsigned buscarJugador(char* actPet, char* respuesta, tArbol* jugadores) {
 
     if (opcion < OPCION_ID || opcion > OPCION_NOMBRE) {
         codRespuesta = ERR_FORMATO;
-        *actRes = codRespuesta;
-        actRes++;
+        cargarCampo(&codRespuesta, sizeof(codRespuesta), &actRes);
         return actRes - respuesta;
     }
 

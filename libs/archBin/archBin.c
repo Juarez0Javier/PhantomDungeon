@@ -2,9 +2,21 @@
 #include <string.h>
 #include "./archBin.h"
 
+int crearArchivoBinVacio(const char* nomArch) {
+    FILE* arch = fopen(nomArch, "wb");
+
+    if (!arch)
+        return ERR_ARCHIVO;
+
+    fclose(arch);
+    return OK;
+}
+
 void mostrarArchivoBin(FILE* arch, unsigned tamReg, Imp imp) {
 
     void* reg = malloc(tamReg);
+
+    rewind(arch);
 
     if (reg == NULL)
         return;

@@ -193,4 +193,4 @@ Universidad Nacional de La Matanza - 2º Cuatrimestre 2025
 ## Repositorio
 
 Para más detalles, consultas o reportar issues, visite el repositorio oficial:
-https://github.com/Juarez0Javier/PhantomDungeon
+https://github.com/LinuxPreachers/PhantomDungeon
